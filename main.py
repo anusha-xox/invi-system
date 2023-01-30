@@ -99,7 +99,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         return redirect(url_for('secrets', display_name=display_name))
-    return render_template("register-old.html")
+    return render_template("register.html")
 
 
 @app.route('/login', methods=['GET', 'POST'])
