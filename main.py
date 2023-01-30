@@ -21,9 +21,11 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 bootstrap = Bootstrap(app)
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+DEPARTMENT_NAMES = ["Aerospace Engineering", "Biotechnology", "Chemical Engineering", "Civil Engineering", "Computer Science and Engineering", "Electrical and Electronics Engineering", "Electronics and Communication Engineering", "Electronics and Instrumentation Engineering", "Industrial Engineering and Management", "Information Science and Engineering", "Master of Computer Applications", "Mechanical Engineering", "Telecommunication Engineering", "Basic Sciences" ]
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -47,6 +49,7 @@ class Faculty(db.Model):
     fac_lname = db.Column(db.String(250), unique=False, nullable=False)
     group_id = db.Column(db.Integer, unique=False, nullable=False)
     phone_no = db.Column(db.Integer, unique=True, nullable=False)
+    dept_id = db.Column(db.Integer, unique=False, nullable=False)
     submit = SubmitField('Submit')
 
 
@@ -61,7 +64,7 @@ class Admin(db.Model):
     group_id = db.Column(db.String(250), unique=False, nullable=False)
 
 
-# db.create_all()
+db.create_all()
 
 
 class FacultyForm(FlaskForm):
@@ -70,20 +73,23 @@ class FacultyForm(FlaskForm):
     fac_fname = StringField('First name', validators=[DataRequired()])
     fac_mname = StringField('Middle name', validators=[DataRequired()])
     fac_lname = StringField('Last name', validators=[DataRequired()])
-    group_id = StringField('Group ID', validators=[DataRequired()])
     phone_no = StringField('Phone Number', validators=[DataRequired()])
+    dept_id = StringField('Department Id', validators=[DataRequired()])
+    dept_name =
     submit = SubmitField('Submit')
 
 
 class AdminForm(FlaskForm):
     fac_id = StringField('Faculty Id', validators=[DataRequired()])
     group_id = StringField('Group Id', validators=[DataRequired()])
+    dept_id = StringField('Dept Id', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
 
 @app.route('/')
 def home():
-    return render_template("index.html")
+    return redirect(url_for('register'))
+    # return render_template("index.html")
 
 
 @app.route('/register', methods=["GET", "POST"])
@@ -104,7 +110,6 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    form = FacultyForm()
     if request.method == "POST":
         email = request.form.get('email')
         password = request.form.get('password')
@@ -117,7 +122,7 @@ def login():
                 login_user(user)
                 # return redirect(url_for('secrets', display_name=user.name))
                 return redirect(url_for('add_faculty', display_name=user.name))
-    return render_template("login.html", form=form)
+    return render_template("login.html")
 
 
 @app.route('/secrets')

@@ -21,34 +21,36 @@
 <!--				</div>-->
 <!--			</div>-->
 			<div class="row justify-content-center">
+
 				<div class="col-md-12 col-lg-10">
 					<div class="wrap d-md-flex">
 						<div class="img" style="background-image: url(https://www.admissioninbangalore.in/wp-content/uploads/2019/01/RV_College_Admin_block.jpg);">
 			      </div>
+
 						<div class="login-wrap p-4 p-md-5">
 			      	<div class="d-flex">
 			      		<div class="w-100">
 			      			<h3 class="mb-4">Register</h3>
 			      		</div>
 			      	</div>
-							<form action="#" class="signin-form">
-                        <div class="form-group mb-3">
-			      			<label class="label" for="email">Name</label>
-			      			<input type="text" class="form-control" placeholder="Username" required>
-			      		</div>
-			      		<div class="form-group mb-3">
-			      			<label class="label" for="email">Email</label>
-			      			<input type="text" class="form-control" placeholder="Username" required>
-			      		</div>
-		            <div class="form-group mb-3">
-		            	<label class="label" for="password">Password</label>
-		              <input type="password" class="form-control" placeholder="Password" required>
-		            </div>
-		            <div class="form-group">
-		            	<button type="submit" class="form-control btn btn-primary rounded submit px-3">Sign In</button>
-		            </div>
-		          </form>
-		          <p class="text-center">Already registered? <a data-toggle="tab" href="{{ url_for('login') }}>Login</a></p>
+						<form action="{{ url_for('register') }}" method="post" class="signin-form">
+							<div class="form-group mb-3">
+								<label class="label" for="name">Name</label>
+								<input type="text" class="form-control" name="name" placeholder="Name" required="required">
+							</div>
+							<div class="form-group mb-3">
+								<label class="label" for="email">Email</label>
+								<input type="email" class="form-control" name="email" placeholder="Email" required="required">
+							</div>
+							<div class="form-group mb-3">
+								<label class="label" for="password">Password</label>
+							  <input type="password" class="form-control" name="password" placeholder="Password" required="required">
+							</div>
+							<div class="form-group">
+								<button type="submit" class="form-control btn btn-primary rounded submit px-3">Sign In</button>
+							</div>
+		          		</form>
+		          		<p class="text-center">Already registered? <a href="{{ url_for('login') }}">Login</a></p>
 		        </div>
 		      </div>
 				</div>
