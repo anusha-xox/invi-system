@@ -99,7 +99,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         return redirect(url_for('secrets', display_name=display_name))
-    return render_template("register.html")
+    return render_template("register-old.html")
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -117,7 +117,7 @@ def login():
                 login_user(user)
                 # return redirect(url_for('secrets', display_name=user.name))
                 return redirect(url_for('add_faculty', display_name=user.name))
-    return render_template("add_faculty.html", form=form)
+    return render_template("login.html", form=form)
 
 
 @app.route('/secrets')
@@ -168,7 +168,7 @@ def logout():
 
 @app.route('/download', methods=["GET", "POST"])
 def download():
-    return send_from_directory(app.config['static - old'], "files/cheat_sheet.pdf", as_attachment=True)
+    return send_from_directory(app.config['static-old'], "files/cheat_sheet.pdf", as_attachment=True)
 
 
 if __name__ == "__main__":
