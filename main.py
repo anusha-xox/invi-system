@@ -25,7 +25,13 @@ bootstrap = Bootstrap(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-DEPARTMENT_NAMES = ["Aerospace Engineering", "Biotechnology", "Chemical Engineering", "Civil Engineering", "Computer Science and Engineering", "Electrical and Electronics Engineering", "Electronics and Communication Engineering", "Electronics and Instrumentation Engineering", "Industrial Engineering and Management", "Information Science and Engineering", "Master of Computer Applications", "Mechanical Engineering", "Telecommunication Engineering", "Basic Sciences" ]
+DEPARTMENT_NAMES = ["Aerospace Engineering", "Biotechnology", "Chemical Engineering", "Civil Engineering",
+                    "Computer Science and Engineering", "Electrical and Electronics Engineering",
+                    "Electronics and Communication Engineering", "Electronics and Instrumentation Engineering",
+                    "Industrial Engineering and Management", "Information Science and Engineering",
+                    "Master of Computer Applications", "Mechanical Engineering", "Telecommunication Engineering",
+                    "Basic Sciences"]
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -41,8 +47,7 @@ class User(UserMixin, db.Model):
 
 class Faculty(db.Model):
     __bind_key__ = 'faculty'
-    id = db.Column(db.Integer, primary_key=True)
-    fac_id = title = db.Column(db.String(250), unique=True, nullable=False)
+    fac_id = db.Column(db.String(250), primary_key=True)
     fac_email = db.Column(db.String(250), unique=True, nullable=False)
     fac_fname = db.Column(db.String(250), unique=False, nullable=False)
     fac_mname = db.Column(db.String(250), unique=False, nullable=False)
@@ -50,18 +55,21 @@ class Faculty(db.Model):
     group_id = db.Column(db.Integer, unique=False, nullable=False)
     phone_no = db.Column(db.Integer, unique=True, nullable=False)
     dept_id = db.Column(db.Integer, unique=False, nullable=False)
-    submit = SubmitField('Submit')
+    dept_name = db.Column(db.String(250), unique=False, nullable=False)
 
 
 class Subject(db.Model):
     __bind_key__ = 'subject'
-    id = db.Column(db.Integer, primary_key=True)
+    sub_id = db.Column(db.Integer, primary_key=True)
+    sub_name = db.Column(db.String(250), unique=False, nullable=False)
+    sub_duration = db.Column(db.Integer, unique=False, nullable=False)
 
 
 class Admin(db.Model):
     __bind_key__ = 'admin'
     fac_id = db.Column(db.String(250), primary_key=True)
     group_id = db.Column(db.String(250), unique=False, nullable=False)
+    dept_id = db.Column(db.String(250), unique=False, nullable=False)
 
 
 db.create_all()
@@ -71,11 +79,11 @@ class FacultyForm(FlaskForm):
     fac_id = StringField('Faculty Id', validators=[DataRequired()])
     fac_email = StringField('Faculty Email', validators=[DataRequired(), Email()])
     fac_fname = StringField('First name', validators=[DataRequired()])
-    fac_mname = StringField('Middle name', validators=[DataRequired()])
-    fac_lname = StringField('Last name', validators=[DataRequired()])
+    fac_mname = StringField('Middle name')
+    fac_lname = StringField('Last name')
     phone_no = StringField('Phone Number', validators=[DataRequired()])
     dept_id = StringField('Department Id', validators=[DataRequired()])
-    dept_name =
+    dept_name = SelectField('Department Name', choices=DEPARTMENT_NAMES, validators=[DataRequired()])
     submit = SubmitField('Submit')
 
 
@@ -83,6 +91,13 @@ class AdminForm(FlaskForm):
     fac_id = StringField('Faculty Id', validators=[DataRequired()])
     group_id = StringField('Group Id', validators=[DataRequired()])
     dept_id = StringField('Dept Id', validators=[DataRequired()])
+    submit = SubmitField('Submit')
+
+
+class SubjectForm(FlaskForm):
+    sub_id = StringField('Subject Id', validators=[DataRequired()])
+    sub_name = StringField('Subject Name', validators=[DataRequired()])
+    sub_duration = StringField('Subject Duration', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
 
@@ -125,23 +140,23 @@ def login():
     return render_template("login.html")
 
 
-@app.route('/secrets')
-# @login_required
-def secrets():
-    display_name = request.args.get("display_name")
-    return render_template("secrets.html", display_name=display_name)
-
-
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
     form = AdminForm()
     if form.validate_on_submit():
+        fac_id = form.fac_id.data,
+        group_id = form.group_id.data,
+        dept_id = form.dept_id.data
         new_allotment = Admin(
-            fac_id=form.fac_id.data,
-            group_id=form.group_id.data,
+            fac_id=fac_id,
+            group_id=group_id,
+            dept_id=dept_id
         )
         db.session.add(new_allotment)
         db.session.commit()
+        faculty_to_edit = Faculty.query.get(fac_id)
+        faculty_to_edit.group_id = group_id
+        return redirect(url_for('logout'))
     return render_template("admin.html", form=form)
 
 
@@ -158,10 +173,12 @@ def add_faculty():
             fac_lname=form.fac_lname.data,
             phone_no=form.phone_no.data,
             group_id=0,
-            dept_no=0,
+            dept_id=form.dept_id.data,
+            dept_name=form.dept_name.data
         )
         db.session.add(new_faculty)
         db.session.commit()
+        return redirect(url_for('logout'))
     return render_template("add_faculty.html", form=form, display_name=display_name)
 
 
@@ -169,6 +186,13 @@ def add_faculty():
 def logout():
     logout_user()
     return redirect(url_for('home'))
+
+
+@app.route('/secrets')
+# @login_required
+def secrets():
+    display_name = request.args.get("display_name")
+    return render_template("secrets.html", display_name=display_name)
 
 
 @app.route('/download', methods=["GET", "POST"])
