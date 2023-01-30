@@ -15,7 +15,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'any-secret-key-you-choose'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_BINDS'] = {'faculty': 'sqlite:///faculty.db',
-                                  'subject': 'sqlite:///subject.db'
+                                  'subject': 'sqlite:///subject.db',
                                   'admin': 'sqlite:///admin.db'}
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
@@ -59,7 +59,7 @@ class Admin(db.Model):
     fac_id = db.Column(db.String(250), primary_key=True)
     group_id = db.Column(db.String(250), unique=False, nullable=False)
 
-#db.create_all()
+# db.create_all()
 
 
 class FacultyForm(FlaskForm):
