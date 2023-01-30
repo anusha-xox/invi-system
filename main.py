@@ -54,10 +54,12 @@ class Subject(db.Model):
     __bind_key__ = 'subject'
     id = db.Column(db.Integer, primary_key=True)
 
+
 class Admin(db.Model):
     __bind_key__ = 'admin'
     fac_id = db.Column(db.String(250), primary_key=True)
     group_id = db.Column(db.String(250), unique=False, nullable=False)
+
 
 # db.create_all()
 
@@ -71,6 +73,7 @@ class FacultyForm(FlaskForm):
     group_id = StringField('Group ID', validators=[DataRequired()])
     phone_no = StringField('Phone Number', validators=[DataRequired()])
     submit = SubmitField('Submit')
+
 
 class AdminForm(FlaskForm):
     fac_id = StringField('Faculty Id', validators=[DataRequired()])
@@ -101,6 +104,7 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    form = FacultyForm()
     if request.method == "POST":
         email = request.form.get('email')
         password = request.form.get('password')
@@ -113,7 +117,7 @@ def login():
                 login_user(user)
                 # return redirect(url_for('secrets', display_name=user.name))
                 return redirect(url_for('add_faculty', display_name=user.name))
-    return render_template("login.html")
+    return render_template("add_faculty.html", form=form)
 
 
 @app.route('/secrets')
@@ -121,6 +125,7 @@ def login():
 def secrets():
     display_name = request.args.get("display_name")
     return render_template("secrets.html", display_name=display_name)
+
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
@@ -133,6 +138,7 @@ def admin():
         db.session.add(new_allotment)
         db.session.commit()
     return render_template("admin.html", form=form)
+
 
 @app.route('/add-faculty', methods=["GET", "POST"])
 def add_faculty():
@@ -153,6 +159,7 @@ def add_faculty():
         db.session.commit()
     return render_template("add_faculty.html", form=form, display_name=display_name)
 
+
 @app.route('/logout')
 def logout():
     logout_user()
@@ -161,7 +168,7 @@ def logout():
 
 @app.route('/download', methods=["GET", "POST"])
 def download():
-    return send_from_directory(app.config['static'], "files/cheat_sheet.pdf", as_attachment=True)
+    return send_from_directory(app.config['static - old'], "files/cheat_sheet.pdf", as_attachment=True)
 
 
 if __name__ == "__main__":
