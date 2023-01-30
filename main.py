@@ -47,7 +47,7 @@ class User(UserMixin, db.Model):
 
 class Faculty(db.Model):
     __bind_key__ = 'faculty'
-    fac_id = db.Column(db.String(250), primary_key=True)
+    fac_id = db.Column(db.Integer, primary_key=True)
     fac_email = db.Column(db.String(250), unique=True, nullable=False)
     fac_fname = db.Column(db.String(250), unique=False, nullable=False)
     fac_mname = db.Column(db.String(250), unique=False, nullable=False)
@@ -67,12 +67,13 @@ class Subject(db.Model):
 
 class Admin(db.Model):
     __bind_key__ = 'admin'
-    fac_id = db.Column(db.String(250), primary_key=True)
+    admin_id = db.Column(db.Integer, primary_key=True)
+    fac_id = db.Column(db.Integer, unique=False, nullable=False)
     group_id = db.Column(db.String(250), unique=False, nullable=False)
     dept_id = db.Column(db.String(250), unique=False, nullable=False)
 
 
-# db.create_all()
+db.create_all()
 
 
 class FacultyForm(FlaskForm):
@@ -144,19 +145,20 @@ def login():
 def admin():
     form = AdminForm()
     if form.validate_on_submit():
-        fac_id = str(form.fac_id.data)
+        fac_id = form.fac_id.data
         group_id = int(form.group_id.data)
         dept_id = str(form.dept_id.data)
-        new_allotment = Admin(
-            fac_id=fac_id,
-            group_id=group_id,
-            dept_id=dept_id
-        )
-        db.session.add(new_allotment)
-        db.session.commit()
-        faculty_to_edit = Faculty.query.get(fac_id)
-        faculty_to_edit.group_id = group_id
-        return redirect(url_for('logout'))
+        faculty_to_edit = Faculty.query.filter_by(fac_id=fac_id).first()
+        if faculty_to_edit:
+            faculty_to_edit.group_id = group_id
+            new_allotment = Admin(
+                fac_id=fac_id,
+                group_id=group_id,
+                dept_id=dept_id
+            )
+            db.session.add(new_allotment)
+            db.session.commit()
+            return redirect(url_for('logout'))
     return render_template("admin.html", form=form)
 
 
@@ -166,7 +168,7 @@ def add_faculty():
     display_name = request.args.get("display_name")
     if form.validate_on_submit():
         new_faculty = Faculty(
-            fac_id=str(form.fac_id.data),
+            fac_id=int(form.fac_id.data),
             fac_email=form.fac_email.data,
             fac_fname=form.fac_fname.data,
             fac_mname=form.fac_mname.data,
