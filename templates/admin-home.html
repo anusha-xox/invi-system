@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% block content %}
+
+    </div>
+  </header><!-- End Header -->
+
+  <!-- ======= Hero Section ======= -->
+  <section id="hero" class="hero d-flex flex-column justify-content-center align-items-center" data-aos="fade" data-aos-delay="1500">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-6 text-center">
+          <h2>Hi <span>Admin</span></h2>
+          <p>What would you like to do today?</p>
+<!--          <a href="contact.html" class="btn-get-started">Available for hire</a>-->
+        </div>
+      </div>
+    </div>
+  </section><!-- End Hero Section -->
+
+  <main id="main" data-aos="fade" data-aos-delay="1500">
+
+    <!-- ======= Gallery Section ======= -->
+    <section id="gallery" class="gallery">
+      <div class="container-fluid">
+
+        <div class="row gy-4 justify-content-center">
+          <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="gallery-item h-100">
+              <img src="https://st2.depositphotos.com/3096625/8801/v/600/depositphotos_88010046-stock-illustration-silhouette-graduate-icon-education-logo.jpg" class="img-fluid" alt="">
+              <div class="gallery-links d-flex align-items-center justify-content-center">
+                <a href="" title="Gallery 1" class="glightbox preview-link">Generate Invigilator Report</a>
+              </div>
+            </div>
+          </div><!-- End Gallery Item -->
+
+          <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="gallery-item h-100">
+              <img src="https://st2.depositphotos.com/3096625/8801/v/600/depositphotos_88010046-stock-illustration-silhouette-graduate-icon-education-logo.jpg" class="img-fluid" alt="">
+              <div class="gallery-links d-flex align-items-center justify-content-center">
+                <a href="" title="Gallery 2" class="glightbox preview-link">Generate Department Report</a>
+              </div>
+            </div>
+          </div><!-- End Gallery Item -->
+
+          <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="gallery-item h-100">
+              <img src="https://st2.depositphotos.com/3096625/8801/v/600/depositphotos_88010046-stock-illustration-silhouette-graduate-icon-education-logo.jpg" class="img-fluid" alt="">
+              <div class="gallery-links d-flex align-items-center justify-content-center">
+                <a href="" class="preview-link">Generate Duty Report</a>
+              </div>
+            </div>
+          </div><!-- End Gallery Item -->
+
+          <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="gallery-item h-100">
+              <img src="https://st2.depositphotos.com/3096625/8801/v/600/depositphotos_88010046-stock-illustration-silhouette-graduate-icon-education-logo.jpg" class="img-fluid" alt="">
+              <div class="gallery-links d-flex align-items-center justify-content-center">
+                <a href="{{ url_for('admin_assign') }}" class="preview-link">Assign Invigilator Roles</a>
+              </div>
+            </div>
+          </div><!-- End Gallery Item -->
+
+        </div>
+
+      </div>
+    </section><!-- End Gallery Section -->
+
+  </main><!-- End #main -->
+
+
+{% endblock %}

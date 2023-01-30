@@ -32,6 +32,8 @@ DEPARTMENT_NAMES = ["Aerospace Engineering", "Biotechnology", "Chemical Engineer
                     "Master of Computer Applications", "Mechanical Engineering", "Telecommunication Engineering",
                     "Basic Sciences"]
 
+FACULTY_ROLE = ["Room Superintendent", "Deputy Room Superintendent", "Squad Team"]
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -71,6 +73,7 @@ class Admin(db.Model):
     fac_id = db.Column(db.Integer, unique=False, nullable=False)
     group_id = db.Column(db.String(250), unique=False, nullable=False)
     dept_id = db.Column(db.String(250), unique=False, nullable=False)
+    faculty_role = db.Column(db.String(250), unique=False, nullable=False)
 
 
 db.create_all()
@@ -92,6 +95,7 @@ class AdminForm(FlaskForm):
     fac_id = StringField('Faculty Id', validators=[DataRequired()])
     group_id = StringField('Group Id', validators=[DataRequired()])
     dept_id = StringField('Dept Id', validators=[DataRequired()])
+    faculty_role = SelectField('Faculty Role', choices=FACULTY_ROLE, validators=[DataRequired()])
     submit = SubmitField('Submit')
 
 
@@ -105,7 +109,7 @@ class SubjectForm(FlaskForm):
 @app.route('/')
 def home():
     return redirect(url_for('register'))
-    # return render_template("index.html")
+    # return render_template("admin-home.html")
 
 
 @app.route('/register', methods=["GET", "POST"])
@@ -141,8 +145,8 @@ def login():
     return render_template("login.html")
 
 
-@app.route('/admin', methods=['GET', 'POST'])
-def admin():
+@app.route('/admin-assign', methods=['GET', 'POST'])
+def admin_assign():
     form = AdminForm()
     if form.validate_on_submit():
         fac_id = form.fac_id.data
@@ -159,7 +163,12 @@ def admin():
             db.session.add(new_allotment)
             db.session.commit()
             return redirect(url_for('logout'))
-    return render_template("admin.html", form=form)
+    return render_template("admin-form.html", form=form)
+
+
+@app.route('/admin', methods=['GET', 'POST'])
+def admin():
+    return render_template("admin-home.html")
 
 
 @app.route('/add-faculty', methods=["GET", "POST"])
@@ -195,6 +204,11 @@ def logout():
 def secrets():
     display_name = request.args.get("display_name")
     return render_template("secrets.html", display_name=display_name)
+
+
+@app.route("/preview")
+def preview():
+    return render_template("admin-home.html")
 
 
 @app.route('/download', methods=["GET", "POST"])
