@@ -16,7 +16,8 @@ app.config['SECRET_KEY'] = 'any-secret-key-you-choose'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_BINDS'] = {'faculty': 'sqlite:///faculty.db',
                                   'subject': 'sqlite:///subject.db',
-                                  'admin': 'sqlite:///admin.db'}
+                                  'admin': 'sqlite:///admin.db',
+                                  'departments': 'sqlite:///departments.db'}
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -65,6 +66,8 @@ class Subject(db.Model):
     sub_id = db.Column(db.Integer, primary_key=True)
     sub_name = db.Column(db.String(250), unique=False, nullable=False)
     sub_duration = db.Column(db.Integer, unique=False, nullable=False)
+    academic_year = db.Column(db.Integer, unique=False, nullable=False)
+    classroom_no = db.Column(db.String(250), unique=False, nullable=False)
 
 
 class Admin(db.Model):
@@ -76,7 +79,13 @@ class Admin(db.Model):
     faculty_role = db.Column(db.String(250), unique=False, nullable=False)
 
 
-db.create_all()
+class Departments(db.Model):
+    __bind_key__ = 'departments'
+    dept_id = db.Column(db.String(250), primary_key=True)
+    dept_name = db.Column(db.String(250), unique=True, nullable=True)
+
+
+# db.create_all()
 
 
 class FacultyForm(FlaskForm):
@@ -191,6 +200,17 @@ def add_faculty():
         db.session.commit()
         return redirect(url_for('logout'))
     return render_template("add_faculty.html", form=form, display_name=display_name)
+
+
+@app.route('/view-faculties')
+def view_faculties():
+    all_faculty = Faculty.query.all()
+    return render_template("view_faculties.html", all_faculty=all_faculty)
+
+@app.route('/view-faculty-dept')
+def view_faculty_dept():
+    all_faculty = Faculty.query.order_by("dept_id").all()
+    return render_template("view-faculty-dept.html", all_faculty=all_faculty)
 
 
 @app.route('/logout')
