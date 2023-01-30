@@ -72,7 +72,7 @@ class Admin(db.Model):
     dept_id = db.Column(db.String(250), unique=False, nullable=False)
 
 
-db.create_all()
+# db.create_all()
 
 
 class FacultyForm(FlaskForm):
@@ -144,9 +144,9 @@ def login():
 def admin():
     form = AdminForm()
     if form.validate_on_submit():
-        fac_id = form.fac_id.data,
-        group_id = form.group_id.data,
-        dept_id = form.dept_id.data
+        fac_id = str(form.fac_id.data)
+        group_id = int(form.group_id.data)
+        dept_id = str(form.dept_id.data)
         new_allotment = Admin(
             fac_id=fac_id,
             group_id=group_id,
@@ -166,14 +166,14 @@ def add_faculty():
     display_name = request.args.get("display_name")
     if form.validate_on_submit():
         new_faculty = Faculty(
-            fac_id=form.fac_id.data,
+            fac_id=str(form.fac_id.data),
             fac_email=form.fac_email.data,
             fac_fname=form.fac_fname.data,
             fac_mname=form.fac_mname.data,
             fac_lname=form.fac_lname.data,
             phone_no=form.phone_no.data,
             group_id=0,
-            dept_id=form.dept_id.data,
+            dept_id=str(form.dept_id.data),
             dept_name=form.dept_name.data
         )
         db.session.add(new_faculty)
