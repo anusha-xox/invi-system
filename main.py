@@ -1,14 +1,12 @@
 from flask import Flask, render_template, request, url_for, redirect, flash, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
-from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField
-from wtforms.validators import DataRequired, URL, Email
 from flask_bootstrap import Bootstrap
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 import email_validator
 from flask_bootstrap import Bootstrap
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
+from form_data import LoginForm, RegisterForm, FacultyForm, AdminForm, SubjectForm
 
 app = Flask(__name__)
 
@@ -26,28 +24,12 @@ bootstrap = Bootstrap(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-DEPARTMENT_NAMES = ["Aerospace Engineering", "Biotechnology", "Chemical Engineering", "Civil Engineering",
-                    "Computer Science and Engineering", "Electrical and Electronics Engineering",
-                    "Electronics and Communication Engineering", "Electronics and Instrumentation Engineering",
-                    "Industrial Engineering and Management", "Information Science and Engineering",
-                    "Master of Computer Applications", "Mechanical Engineering", "Telecommunication Engineering",
-                    "Basic Sciences"]
-
-FACULTY_ROLE = ["Room Superintendent", "Deputy Room Superintendent", "Squad Team"]
-EXAM_TYPE = ["Regular", "Fasttrack", "Make Up"]
-EXAM_YEAR = ["2016-17", "2017-18", "2018-19", "2019-20", "2020-21", "2021-22", "2022-23"]
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
-
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(100))
-    name = db.Column(db.String(1000))
+    username = db.Column(db.String(1000))
 
 
 class Faculty(db.Model):
@@ -63,13 +45,13 @@ class Faculty(db.Model):
     dept_name = db.Column(db.String(250), unique=False, nullable=False)
 
 
-class Subject(db.Model):
-    __bind_key__ = 'subject'
-    sub_id = db.Column(db.Integer, primary_key=True)
-    sub_name = db.Column(db.String(250), unique=False, nullable=False)
-    sub_duration = db.Column(db.Integer, unique=False, nullable=False)
-    academic_year = db.Column(db.Integer, unique=False, nullable=False)
-    classroom_no = db.Column(db.String(250), unique=False, nullable=False)
+# class Subject(db.Model):
+#     __bind_key__ = 'subject'
+#     sub_id = db.Column(db.Integer, primary_key=True)
+#     sub_name = db.Column(db.String(250), unique=False, nullable=False)
+#     sub_duration = db.Column(db.Integer, unique=False, nullable=False)
+#     academic_year = db.Column(db.Integer, unique=False, nullable=False)
+#     classroom_no = db.Column(db.String(250), unique=False, nullable=False)
 
 
 class Admin(db.Model):
@@ -83,42 +65,18 @@ class Admin(db.Model):
     exam_year = db.Column(db.String(250), unique=False, nullable=False)
 
 
-class Departments(db.Model):
-    __bind_key__ = 'departments'
-    dept_id = db.Column(db.String(250), primary_key=True)
-    dept_name = db.Column(db.String(250), unique=True, nullable=True)
+# class Departments(db.Model):
+#     __bind_key__ = 'departments'
+#     dept_id = db.Column(db.String(250), primary_key=True)
+#     dept_name = db.Column(db.String(250), unique=True, nullable=True)
 
 
 db.create_all()
 
 
-class FacultyForm(FlaskForm):
-    fac_id = StringField('Faculty Id', validators=[DataRequired()])
-    fac_email = StringField('Faculty Email', validators=[DataRequired(), Email()])
-    fac_fname = StringField('First name', validators=[DataRequired()])
-    fac_mname = StringField('Middle name')
-    fac_lname = StringField('Last name')
-    phone_no = StringField('Phone Number', validators=[DataRequired()])
-    dept_id = StringField('Department Id', validators=[DataRequired()])
-    dept_name = SelectField('Department Name', choices=DEPARTMENT_NAMES, validators=[DataRequired()])
-    submit = SubmitField('Submit')
-
-
-class AdminForm(FlaskForm):
-    fac_id = StringField('Faculty Id', validators=[DataRequired()])
-    group_id = StringField('Group Id', validators=[DataRequired()])
-    dept_id = StringField('Dept Id', validators=[DataRequired()])
-    faculty_role = SelectField('Faculty Role', choices=FACULTY_ROLE, validators=[DataRequired()])
-    exam_type = SelectField('Exam Type', choices=EXAM_TYPE, validators=[DataRequired()])
-    exam_year = SelectField('Exam Year', choices=EXAM_YEAR, validators=[DataRequired()])
-    submit = SubmitField('Submit')
-
-
-class SubjectForm(FlaskForm):
-    sub_id = StringField('Subject Id', validators=[DataRequired()])
-    sub_name = StringField('Subject Name', validators=[DataRequired()])
-    sub_duration = StringField('Subject Duration', validators=[DataRequired()])
-    submit = SubmitField('Submit')
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 
 @app.route('/')
@@ -129,38 +87,73 @@ def home():
 
 @app.route('/register', methods=["GET", "POST"])
 def register():
-    if request.method == "POST":
-        data = request.form
+    form = RegisterForm()
+    if form.validate_on_submit():
         new_user = User(
-            email=data["email"],
-            password=generate_password_hash(data["password"], method='pbkdf2:sha256', salt_length=8),
-            name=request.form.get("name"),
+            username=form.username.data,
+            email=form.email.data,
+            password=generate_password_hash(form.password.data, method='pbkdf2:sha256', salt_length=8)
         )
-        display_name = data["name"]
         db.session.add(new_user)
         db.session.commit()
-        return redirect(url_for('secrets', display_name=display_name))
-    return render_template("register.html")
+        display_name = form.username.data
+        return redirect(url_for('add_faculty', display_name=display_name))
+    return render_template("enter.html", form=form, title_given="Register")
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == "POST":
-        email = request.form.get('email')
-        password = request.form.get('password')
+    form = LoginForm()
+    if form.validate_on_submit():
+        email = form.email.data
+        password = form.password.data
+        user = User.query.filter_by(email=email).first()
         if email == 'admin@email.com' and password == 'admin':
             return redirect(url_for('admin'))
+        elif not user:
+            flash("That email does not exist, please try again.")
+            return redirect(url_for('login'))
+        elif not check_password_hash(user.password, password):
+            flash('Password incorrect, please try again.')
+            return redirect(url_for('login'))
         else:
             user = User.query.filter_by(email=email).first()
-            requested_user_email = User.query.get(email)
             if check_password_hash(user.password, password):
                 login_user(user)
-                # return redirect(url_for('secrets', display_name=user.name))
-                for f in Faculty.query.all():
-                    if user.email == f.fac_email:
-                        return redirect(url_for("faculty_dashboard", fac_id=f.fac_id))
-                return redirect(url_for('add_faculty', display_name=user.name))
-    return render_template("login.html")
+                return redirect(url_for('add_faculty', display_name=user.username))
+                # for f in Faculty.query.all():
+                #     if user.email == f.fac_email:
+                #         return redirect(url_for("faculty_dashboard", fac_id=f.fac_id))
+    return render_template('enter.html', form=form, title_given="Login")
+
+
+@app.route('/add-faculty', methods=["GET", "POST"])
+def add_faculty():
+    form = FacultyForm()
+    display_name = request.args.get("display_name")
+    if form.validate_on_submit():
+        new_faculty = Faculty(
+            fac_id=int(form.fac_id.data),
+            fac_email=form.fac_email.data,
+            fac_fname=form.fac_fname.data,
+            fac_mname=form.fac_mname.data,
+            fac_lname=form.fac_lname.data,
+            phone_no=form.phone_no.data,
+            group_id=0,
+            dept_id=str(form.dept_id.data),
+            dept_name=form.dept_name.data
+        )
+        db.session.add(new_faculty)
+        db.session.commit()
+        return redirect(url_for('logout'))
+    return render_template("add_details.html", form=form, display_name=display_name)
+
+
+@app.route('/admin', methods=['GET', 'POST'])
+def admin():
+    ADMIN_OPTIONS = ["Generate Invigilator Report", "Generate Department Report", "Generate Duty Report", "Assign Invigilator Roles"]
+    ADMIN_LINKS = [url_for('view_faculties'), url_for('view_faculty_dept'), "", url_for('admin_assign')]
+    return render_template("grid.html", title="Admin", grid_options=ADMIN_OPTIONS, grid_links=ADMIN_LINKS, grid_no=len(ADMIN_OPTIONS))
 
 
 @app.route('/admin-assign', methods=['GET', 'POST'])
@@ -184,7 +177,7 @@ def admin_assign():
             db.session.add(new_allotment)
             db.session.commit()
             return redirect(url_for('admin'))
-    return render_template("admin-form.html", form=form)
+    return render_template("add_details.html", form=form, display_name="Admin! Add/Update Faculty details below.")
 
 
 @app.route("/faculty-dashboard/<int:fac_id>", methods=['GET', 'POST'])
@@ -193,43 +186,16 @@ def faculty_dashboard(fac_id):
     return render_template("faculty-dashboard.html", current_faculty=current_faculty)
 
 
-@app.route('/admin', methods=['GET', 'POST'])
-def admin():
-    return render_template("admin-home.html")
-
-
-@app.route('/add-faculty', methods=["GET", "POST"])
-def add_faculty():
-    form = FacultyForm()
-    display_name = request.args.get("display_name")
-    if form.validate_on_submit():
-        new_faculty = Faculty(
-            fac_id=int(form.fac_id.data),
-            fac_email=form.fac_email.data,
-            fac_fname=form.fac_fname.data,
-            fac_mname=form.fac_mname.data,
-            fac_lname=form.fac_lname.data,
-            phone_no=form.phone_no.data,
-            group_id=0,
-            dept_id=str(form.dept_id.data),
-            dept_name=form.dept_name.data
-        )
-        db.session.add(new_faculty)
-        db.session.commit()
-        return redirect(url_for('logout'))
-    return render_template("add_faculty.html", form=form, display_name=display_name)
-
-
-@app.route('/view-faculties')
+@app.route('/admin/view-faculties')
 def view_faculties():
     all_faculty = Faculty.query.all()
-    return render_template("view_faculties.html", all_faculty=all_faculty)
+    return render_template("view_faculties.html", all_faculty=all_faculty, table_heading="All Faculties")
 
 
-@app.route('/view-faculty-dept')
+@app.route('/admin/view-faculty-dept')
 def view_faculty_dept():
     all_faculty = Faculty.query.order_by("dept_id").all()
-    return render_template("view-faculty-dept.html", all_faculty=all_faculty)
+    return render_template("view_faculty_dept.html", all_faculty=all_faculty, table_heading="All Faculty's Departments")
 
 
 @app.route('/logout')
@@ -245,8 +211,8 @@ def secrets():
     return render_template("secrets.html", display_name=display_name)
 
 
-@app.route("/preview")
-def preview():
+@app.route("/about")
+def about():
     return render_template("admin-home.html")
 
 

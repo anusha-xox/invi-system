@@ -1,0 +1,50 @@
+{% include "header.html" %}
+<!--  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">-->
+<!--		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">-->
+<!--<div id="main">-->
+<div id="main">
+						<div class="inner">
+							<header>
+								<h1>{{ table_heading }}</h1>
+							</header>
+
+
+<table class="table table-striped table-light">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Faculty Id</th>
+      <th scope="col">Email</th>
+      <th scope="col">First name</th>
+      <th scope="col">Middle name</th>
+      <th scope="col">Last name</th>
+      <th scope="col">Phone No</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for fac in all_faculty: %}
+    <tr>
+      <th scope="row">{{fac.fac_id}}</th>
+      <td>{{ fac.fac_email }}</td>
+      <td>{{ fac.fac_fname }}</td>
+      <td>{{ fac.fac_mname }}</td>
+      <td>{{ fac.fac_lname }}</td>
+      <td>{{ fac.phone_no }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+                </div>
+</div>
+
+
+
+
+<!-- Footer -->
+
+
+<!-- Footer -->
+
+ <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+
+
+{% include "footer.html" %}
