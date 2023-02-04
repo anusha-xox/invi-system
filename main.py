@@ -34,7 +34,6 @@ DEPARTMENT_NAMES = ["Aerospace Engineering", "Biotechnology", "Chemical Engineer
                     "Basic Sciences"]
 
 FACULTY_ROLE = ["Room Superintendent", "Deputy Room Superintendent", "Squad Team"]
-
 EXAM_TYPE = ["Regular", "Fasttrack", "Make Up"]
 EXAM_YEAR = ["2016-17", "2017-18", "2018-19", "2019-20", "2020-21", "2021-22", "2022-23"]
 
@@ -157,9 +156,9 @@ def login():
             if check_password_hash(user.password, password):
                 login_user(user)
                 # return redirect(url_for('secrets', display_name=user.name))
-                # for f in Faculty.query.all():
-                #     if user.email == f.fac_email:
-                #         return redirect(url_for("faculty_dashboard", fac_id=f.fac_id))
+                for f in Faculty.query.all():
+                    if user.email == f.fac_email:
+                        return redirect(url_for("faculty_dashboard", fac_id=f.fac_id))
                 return redirect(url_for('add_faculty', display_name=user.name))
     return render_template("login.html")
 
@@ -190,7 +189,7 @@ def admin_assign():
 
 @app.route("/faculty-dashboard/<int:fac_id>", methods=['GET', 'POST'])
 def faculty_dashboard(fac_id):
-    current_faculty = User.query.filter_by(fac_id=fac_id).first()
+    current_faculty = Faculty.query.filter_by(fac_id=fac_id).first()
     return render_template("faculty-dashboard.html", current_faculty=current_faculty)
 
 
@@ -253,7 +252,7 @@ def preview():
 
 @app.route('/download', methods=["GET", "POST"])
 def download():
-    return send_from_directory(app.config['static-old'], "files/cheat_sheet.pdf", as_attachment=True)
+    return send_from_directory(app.config['static-dark-old'], "files/cheat_sheet.pdf", as_attachment=True)
 
 
 if __name__ == "__main__":
