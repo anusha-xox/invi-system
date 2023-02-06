@@ -356,7 +356,36 @@ def view_swap_requests():
 
 @app.route('/plot')
 def plot():
-    pass
+    plt.switch_backend('agg')
+    grouped_up_data = db.session.query(Faculty.dept_name, func.count(Faculty.dept_name).label("total_count")).group_by(
+        Faculty.dept_name).all()
+    fields = [i[0] for i in grouped_up_data]
+    for i in DEPARTMENT_NAMES:
+        if i in fields:
+            pass
+        else:
+            grouped_up_data.append((i, 0))
+    print(grouped_up_data)
+    fields = [i[0] for i in grouped_up_data]
+    left = [5, 20, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70]
+    # heights of bars
+    # height = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+    height = [i[1] for i in grouped_up_data]
+    # labels for bars
+    abrev = [i.split(" ") for i in fields]
+    tick_label = [f"{i[0][0]}{i[len(i) - 1][0]}" for i in abrev]
+    # plotting a bar chart
+    plt.bar(left, height, tick_label=tick_label, width=0.8)
+
+    # naming the y-axis
+    plt.ylabel('Departments Present')
+    # naming the x-axis
+    plt.xlabel('No of Faculties Allotted')
+    # plot title
+    plt.title('No of Faculties vs Department Plot')
+
+    plt.savefig('static/img/plot.png')
+    return render_template('plot.html', url='/static/img/plot.png')
 
 
 @app.route('/admin/approve-swap', methods=['GET', 'POST'])
