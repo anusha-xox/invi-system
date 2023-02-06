@@ -1,0 +1,46 @@
+{% import 'bootstrap/wtf.html' as wtf %}
+{% include "header.html" %}
+<div id="main">
+						<div class="inner">
+							<header>
+								<h1>{{ table_heading }}</h1>
+							</header>
+
+
+<table class="table table-striped table-light">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Faculty Requesting</th>
+      <th scope="col">Swapping With</th>
+      <th scope="col">Old Duty Date & Time</th>
+      <th scope="col">New Duty Date & Time</th>
+      <th scope="col">Old Subject Code</th>
+      <th scope="col">New Subject Code</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for req in all_requests: %}
+    <tr>
+      <th scope="row">{{req.curr_fac_id}}</th>
+      <td>{{ req.other_fac_id }}</td>
+      <td>{{ req.old_date }} & {{ req.old_time }}</td>
+      <td>{{ req.new_date }} & {{ req.new_time }} </td>
+      <td>{{ req.old_subject_code }}</td>
+      <td>{{ req.new_subject_code }}</td>
+
+        <td>
+<!--          <p><b><a href="{{ url_for('register') }}">Approve</a>.</b></p>-->
+          <form action="{{ url_for('approve_swap', swap_id= req.swap_id)}}" method="post">
+                      <input class="btn btn-default" id="submit" name="submit" type="submit" value="Approve"></td>
+          </form>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+                </div>
+</div>
+
+
+
+<!-- Footer -->
+{% include "footer.html" %}

@@ -191,7 +191,7 @@ def admin():
         "View Swap Requests"
     ]
     ADMIN_LINKS = [url_for('view_faculties'), url_for('view_faculty_dept'), url_for("view_invi_report"),
-                   url_for('admin_assign'), ""]
+                   url_for('admin_assign'), url_for("view_swap_requests")]
     return render_template(
         "grid.html",
         title="Admin",
@@ -336,6 +336,20 @@ def view_faculty_dept():
 def view_invi_report():
     all_faculty = Admin.query.order_by("date").all()
     return render_template("view_invi_report.html", all_faculty=all_faculty, table_heading="All Faculty's Exam Duties")
+
+
+@app.route('/admin/view-swap-requests', methods=['GET', 'POST'])
+def view_swap_requests():
+    all_requests = SwappingTable.query.order_by("swap_id").all()
+    return render_template("view_swap_requests.html", all_requests=all_requests, table_heading="All Swap Requests")
+
+
+@app.route('/admin/approve-swap', methods=['GET', 'POST'])
+def approve_swap():
+    swap_id = int(request.args.get("swap_id"))
+    current_swap = SwappingTable.query.get(swap_id)
+    if current_swap:
+        return redirect(url_for("logout"))
 
 
 @app.route('/logout')
