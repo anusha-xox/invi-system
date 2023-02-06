@@ -15,8 +15,6 @@ import io
 from flask import Response
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
-import random
-import numpy as np
 import matplotlib.pyplot as plt
 
 app = Flask(__name__)
@@ -375,7 +373,7 @@ def plot():
     abrev = [i.split(" ") for i in fields]
     tick_label = [f"{i[0][0]}{i[len(i) - 1][0]}" for i in abrev]
     # plotting a bar chart
-    plt.bar(left, height, tick_label=tick_label, width=0.8)
+    plt.bar(left, height, tick_label=tick_label, width=1)
 
     # naming the y-axis
     plt.ylabel('Departments Present')
@@ -393,6 +391,23 @@ def approve_swap():
     swap_id = int(request.args.get("swap_id"))
     current_swap = SwappingTable.query.get(swap_id)
     if current_swap:
+        id1 = current_swap.curr_fac_id
+        id2 = current_swap.other_fac_id
+        faculty1 = Admin.query.filter_by(fac_id=id1).first()
+        faculty2 = Admin.query.filter_by(fac_id=id2).first()
+        faculty1.date = current_swap.new_date
+        faculty2.date = current_swap.old_date
+        faculty1.timeslot = current_swap.new_time
+        faculty2.timeslot = current_swap.old_time
+        faculty1.exam_type = current_swap.new_exam_type
+        faculty2.exam_type = current_swap.old_exam_type
+        faculty1.exam_year = current_swap.new_exam_year
+        faculty2.exam_year = current_swap.old_exam_year
+        faculty1.subject_code = current_swap.new_subject_code
+        faculty2.subject_code = current_swap.old_subject_code
+        db.session.commit()
+        return redirect(url_for('admin'))
+    else:
         return redirect(url_for("logout"))
 
 
