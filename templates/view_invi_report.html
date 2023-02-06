@@ -13,22 +13,26 @@
   <thead class="thead-dark">
     <tr>
       <th scope="col">Faculty Id</th>
-      <th scope="col">Email</th>
-      <th scope="col">First name</th>
-      <th scope="col">Middle name</th>
-      <th scope="col">Last name</th>
-      <th scope="col">Phone Number</th>
+      <th scope="col">Faculty Group Id</th>
+      <th scope="col">Faculty Role</th>
+      <th scope="col">Date of Exam</th>
+      <th scope="col">Timeslot of Exam</th>
+      <th scope="col">Exam Type</th>
+      <th scope="col">Department ID</th>
+      <th scope="col">Subject Code</th>
     </tr>
   </thead>
   <tbody>
     {% for fac in all_faculty: %}
     <tr>
-      <th scope="row">{{fac.fac_id}}</th>
-      <td>{{ fac.fac_email }}</td>
-      <td>{{ fac.fac_fname }}</td>
-      <td>{{ fac.fac_mname }}</td>
-      <td>{{ fac.fac_lname }}</td>
-      <td>{{ fac.phone_no }}</td>
+      <th scope="row">{{ fac.fac_id }}</th>
+      <td>{{ fac.group_id }}</td>
+      <td>{{ fac.faculty_role }}</td>
+      <td>{{ fac.date }}</td>
+      <td>{{ fac.timeslot }}</td>
+      <td>{{ fac.exam_type }}</td>
+      <td>{{ fac.dept_id }}</td>
+      <td>{{ fac.subject_code }}</td>
     </tr>
     {% endfor %}
   </tbody>

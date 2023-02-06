@@ -8,7 +8,7 @@ import pymysql
 import cryptography
 from flask_bootstrap import Bootstrap
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from form_data import LoginForm, RegisterForm, FacultyForm, AdminForm, SubjectForm
+from form_data import LoginForm, RegisterForm, FacultyForm, AdminForm, SubjectForm, SwapRequestForm
 
 app = Flask(__name__)
 
@@ -48,6 +48,8 @@ class Faculty(db.Model):
     dept_id = db.Column(db.Integer, unique=False, nullable=False)
     dept_name = db.Column(db.String(250), unique=False, nullable=False)
 
+    fac_admin_foreign = db.Column(db.Integer, db.ForeignKey('admin.fac_id'))
+
 
 class Subject(db.Model):
     # __bind_key__ = 'subject'
@@ -59,20 +61,39 @@ class Subject(db.Model):
 
 
 class Admin(db.Model):
-    # __bind_key__ = 'admin'
-    admin_id = db.Column(db.Integer, primary_key=True)
+    # __bind_key__ = 'inviDuty'
+    entry_id = db.Column(db.Integer, primary_key=True)
     fac_id = db.Column(db.Integer, unique=False, nullable=False)
     group_id = db.Column(db.String(250), unique=False, nullable=False)
     dept_id = db.Column(db.String(250), unique=False, nullable=False)
-    faculty_role = db.Column(db.String(250), unique=False, nullable=False)
+    date = db.Column(db.String(250), unique=False, nullable=False)
+    timeslot = db.Column(db.String(250), unique=False, nullable=False)
     exam_type = db.Column(db.String(250), unique=False, nullable=False)
     exam_year = db.Column(db.String(250), unique=False, nullable=False)
+    faculty_role = db.Column(db.String(250), unique=False, nullable=False)
+    subject_code = db.Column(db.String(250), unique=False, nullable=False)
+    invigilators = db.relationship("Faculty", backref="admin")
 
 
 class Departments(db.Model):
-    __bind_key__ = 'departments'
     dept_id = db.Column(db.String(250), primary_key=True)
     dept_name = db.Column(db.String(250), unique=True, nullable=True)
+
+
+class SwappingTable(db.Model):
+    swap_id = db.Column(db.Integer, primary_key=True)
+    curr_fac_id = db.Column(db.Integer, unique=False, nullable=False)
+    other_fac_id = db.Column(db.Integer, unique=False, nullable=False)
+    old_date = db.Column(db.String(250), unique=False, nullable=False)
+    new_date = db.Column(db.String(250), unique=False, nullable=False)
+    old_time = db.Column(db.String(250), unique=False, nullable=False)
+    new_time = db.Column(db.String(250), unique=False, nullable=False)
+    old_exam_type = db.Column(db.String(250), unique=False, nullable=False)
+    new_exam_type = db.Column(db.String(250), unique=False, nullable=False)
+    old_exam_year = db.Column(db.String(250), unique=False, nullable=False)
+    new_exam_year = db.Column(db.String(250), unique=False, nullable=False)
+    old_subject_code = db.Column(db.String(250), unique=False, nullable=False)
+    new_subject_code = db.Column(db.String(250), unique=False, nullable=False)
 
 
 db.create_all()
@@ -130,8 +151,8 @@ def login():
                     if user.email == f.fac_email:
                         # return redirect(url_for('add_faculty', display_name=user.username))
                         return redirect(url_for("faculty_dashboard", fac_id=f.fac_id))
-                    else:
-                        return redirect(url_for('add_faculty', display_name=user.username, default_email=user.email))
+                    # else:
+                    #     return redirect(url_for('add_faculty', display_name=user.username, default_email=user.email))
     return render_template('enter.html', form=form, title_given="Login")
 
 
@@ -162,9 +183,15 @@ def add_faculty():
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
-    ADMIN_OPTIONS = ["Generate Invigilator Report", "Generate Department Report", "Generate Duty Report",
-                     "Assign Invigilator Roles"]
-    ADMIN_LINKS = [url_for('view_faculties'), url_for('view_faculty_dept'), "", url_for('admin_assign')]
+    ADMIN_OPTIONS = [
+        "Generate Invigilator Report",
+        "Generate Department Report",
+        "Generate Duty Report",
+        "Give Invigilator Duty",
+        "View Swap Requests"
+    ]
+    ADMIN_LINKS = [url_for('view_faculties'), url_for('view_faculty_dept'), url_for("view_invi_report"),
+                   url_for('admin_assign'), ""]
     return render_template(
         "grid.html",
         title="Admin",
@@ -183,13 +210,13 @@ def faculty_dashboard():
             "Edit Profile",
             "View Profile",
             "Generate Duty Report",
-            "Request Swap from Admin"
+            "Request Swap from Admin",
         ]
         FACULTY_LINKS = [
             url_for('edit_profile', fac_id=fac_id),
             url_for('view_profile', fac_id=fac_id),
-            "",
-            url_for("swap_request")]
+            url_for("view_invi_report"),
+            url_for("swap_request", fac_id=fac_id)]
         return render_template(
             "grid.html",
             title=current_faculty.fac_fname,
@@ -227,14 +254,43 @@ def edit_profile():
             return redirect(url_for("faculty_dashboard", fac_id=new_fac_id))
         return render_template("add_details.html", form=form, display_name=current_faculty.fac_fname)
 
+
 @app.route("/faculty-home/view")
 def view_profile():
     fac_id = int(request.args.get("fac_id"))
+    current_faculty = Faculty.query.get(fac_id)
+    heading = f"{current_faculty.fac_fname} {current_faculty.fac_mname} {current_faculty.fac_lname}'s Saved Details"
+    return render_template("faculty_details.html", cf=current_faculty, table_heading=heading)
 
 
-@app.route("/faculty-home/swap-request")
+@app.route("/faculty-home/swap-request", methods=['GET', 'POST'])
 def swap_request():
     fac_id = int(request.args.get("fac_id"))
+    current_faculty = Faculty.query.get(fac_id)
+    if current_faculty:
+        form = SwapRequestForm(
+            cur_fac_id=int(current_faculty.fac_id),
+        )
+        if form.validate_on_submit():
+            new_record = SwappingTable(
+                curr_fac_id=int(form.curr_fac_id.data),
+                other_fac_id=form.other_fac_id.data,
+                old_date=form.old_date.data,
+                new_date=form.new_date.data,
+                old_time=form.old_time.data,
+                new_time=form.new_time.data,
+                old_exam_type=form.old_exam_type.data,
+                new_exam_type=form.new_exam_type.data,
+                old_exam_year=form.old_exam_year.data,
+                new_exam_year=form.new_exam_year.data,
+                old_subject_code=form.old_subject_code.data,
+                new_subject_code=form.new_subject_code.data,
+            )
+            db.session.add(new_record)
+            db.session.commit()
+            curr_fac_id = int(form.curr_fac_id.data)
+            return redirect(url_for("faculty_dashboard", fac_id=curr_fac_id))
+        return render_template("add_details.html", form=form, display_name=current_faculty.fac_fname)
 
 
 @app.route('/admin-assign', methods=['GET', 'POST'])
@@ -252,8 +308,11 @@ def admin_assign():
                 group_id=group_id,
                 dept_id=dept_id,
                 faculty_role=form.faculty_role.data,
+                date=form.date.data,
+                timeslot=form.timeslot.data,
                 exam_type=form.exam_type.data,
-                exam_year=form.exam_year.data
+                exam_year=form.exam_year.data,
+                subject_code=form.subject_code.data
             )
             db.session.add(new_allotment)
             db.session.commit()
@@ -271,6 +330,12 @@ def view_faculties():
 def view_faculty_dept():
     all_faculty = Faculty.query.order_by("dept_id").all()
     return render_template("view_faculty_dept.html", all_faculty=all_faculty, table_heading="All Faculty's Departments")
+
+
+@app.route('/view-invi-report')
+def view_invi_report():
+    all_faculty = Admin.query.order_by("date").all()
+    return render_template("view_invi_report.html", all_faculty=all_faculty, table_heading="All Faculty's Exam Duties")
 
 
 @app.route('/logout')
