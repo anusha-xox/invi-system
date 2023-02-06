@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, url_for, redirect, flash, send_from_directory
+from sqlalchemy import func
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
@@ -8,7 +9,15 @@ import pymysql
 import cryptography
 from flask_bootstrap import Bootstrap
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from form_data import LoginForm, RegisterForm, FacultyForm, AdminForm, SubjectForm, SwapRequestForm
+from form_data import LoginForm, RegisterForm, FacultyForm, AdminForm, SubjectForm, SwapRequestForm, DEPARTMENT_NAMES
+## for graph
+import io
+from flask import Response
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
+import random
+import numpy as np
+import matplotlib.pyplot as plt
 
 app = Flask(__name__)
 
@@ -188,10 +197,11 @@ def admin():
         "Generate Department Report",
         "Generate Duty Report",
         "Give Invigilator Duty",
-        "View Swap Requests"
+        "View Swap Requests",
+        "No of Faculties vs Department Plot"
     ]
     ADMIN_LINKS = [url_for('view_faculties'), url_for('view_faculty_dept'), url_for("view_invi_report"),
-                   url_for('admin_assign'), url_for("view_swap_requests")]
+                   url_for('admin_assign'), url_for("view_swap_requests"), url_for("plot")]
     return render_template(
         "grid.html",
         title="Admin",
@@ -342,6 +352,11 @@ def view_invi_report():
 def view_swap_requests():
     all_requests = SwappingTable.query.order_by("swap_id").all()
     return render_template("view_swap_requests.html", all_requests=all_requests, table_heading="All Swap Requests")
+
+
+@app.route('/plot')
+def plot():
+    pass
 
 
 @app.route('/admin/approve-swap', methods=['GET', 'POST'])
