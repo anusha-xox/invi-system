@@ -388,27 +388,7 @@ def plot():
 
 @app.route('/admin/approve-swap', methods=['GET', 'POST'])
 def approve_swap():
-    swap_id = int(request.args.get("swap_id"))
-    current_swap = SwappingTable.query.get(swap_id)
-    if current_swap:
-        id1 = current_swap.curr_fac_id
-        id2 = current_swap.other_fac_id
-        faculty1 = Admin.query.filter_by(fac_id=id1).first()
-        faculty2 = Admin.query.filter_by(fac_id=id2).first()
-        faculty1.date = current_swap.new_date
-        faculty2.date = current_swap.old_date
-        faculty1.timeslot = current_swap.new_time
-        faculty2.timeslot = current_swap.old_time
-        faculty1.exam_type = current_swap.new_exam_type
-        faculty2.exam_type = current_swap.old_exam_type
-        faculty1.exam_year = current_swap.new_exam_year
-        faculty2.exam_year = current_swap.old_exam_year
-        faculty1.subject_code = current_swap.new_subject_code
-        faculty2.subject_code = current_swap.old_subject_code
-        db.session.commit()
-        return redirect(url_for('admin'))
-    else:
-        return redirect(url_for("logout"))
+    pass
 
 
 @app.route('/logout')
