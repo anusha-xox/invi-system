@@ -313,18 +313,16 @@ def faculty_dashboard():
             "Request Swap from Admin",
         ]
         FACULTY_LINKS = [
-            url_for('edit_profile', faculty_id=faculty_id, dept_id=dept_id),
-            url_for('view_profile', faculty_id=faculty_id, dept_id=dept_id),
+            url_for('edit_profile', faculty_id=current_faculty.faculty_id, dept_id=current_faculty.dept_id),
+            url_for('view_profile', faculty_id=current_faculty.faculty_id, dept_id=current_faculty.dept_id),
             url_for("view_invi_report"),
-            url_for("swap_request", faculty_id=faculty_id, dept_id=dept_id)]
+            url_for("swap_request", faculty_id=current_faculty.faculty_id, dept_id=current_faculty.dept_id)]
         return render_template(
             "grid.html",
             title=current_faculty.f_name + " " + current_faculty.l_name,
             grid_options=FACULTY_OPTIONS,
             grid_links=FACULTY_LINKS,
             grid_no=len(FACULTY_OPTIONS),
-            faculty_id=faculty_id,
-            dept_id=dept_id
         )
 
 
@@ -369,10 +367,11 @@ def view_profile():
 @app.route("/faculty-home/swap-request", methods=['GET', 'POST'])
 def swap_request():
     faculty_id = request.args.get("faculty_id")
-    current_faculty = Faculty.query.get(faculty_id)
+    dept_id = request.args.get("dept_id")
+    current_faculty = Faculty.query.filter_by(faculty_id=faculty_id).filter_by(dept_id=dept_id).first()
     if current_faculty:
         form = SwapRequestForm(
-            cur_fac_id=current_faculty.fac_id,
+            cur_fac_id=current_faculty.faculty_id,
         )
         if form.validate_on_submit():
             new_record = SwappingTable(
