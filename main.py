@@ -239,19 +239,20 @@ def add_faculty():
     display_name = request.args.get("display_name")
     default_email = request.args.get("default_email")
     form = FacultyForm(
-        fac_email=default_email
+        email=default_email
     )
     if form.validate_on_submit():
         new_faculty = Faculty(
-            fac_id=form.fac_id.data,
-            fac_email=form.fac_email.data,
-            fac_fname=form.fac_fname.data,
-            fac_mname=form.fac_mname.data,
-            fac_lname=form.fac_lname.data,
+            faculty_id=form.faculty_id.data,
+            email=form.email.data,
+            f_name=form.f_name.data,
+            m_name=form.m_name.data,
+            l_name=form.l_name.data,
             phone_no=form.phone_no.data,
             group_id=0,
+            invig_count=0,
+            special_count=0,
             dept_id=str(form.dept_id.data),
-            dept_name=form.dept_name.data
         )
         db.session.add(new_faculty)
         db.session.commit()

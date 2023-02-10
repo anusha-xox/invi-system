@@ -33,11 +33,11 @@ class RegisterForm(FlaskForm):
 
 
 class FacultyForm(FlaskForm):
-    fac_id = StringField('Faculty Id', validators=[DataRequired()])
-    fac_email = StringField('Faculty Email', validators=[DataRequired(), Email()])
-    fac_fname = StringField('First name', validators=[DataRequired()])
-    fac_mname = StringField('Middle name')
-    fac_lname = StringField('Last name')
+    faculty_id = StringField('Faculty Id', validators=[DataRequired()])
+    email = StringField('Faculty Email', validators=[DataRequired(), Email()])
+    f_name = StringField('First name', validators=[DataRequired()])
+    m_name = StringField('Middle name')
+    l_name = StringField('Last name')
     phone_no = StringField('Phone Number', validators=[DataRequired()])
     dept_id = StringField('Department Id', validators=[DataRequired()])
 
