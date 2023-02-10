@@ -18,26 +18,28 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import mysql.connector
 from mysql.connector import Error
-
-try:
-    connection = mysql.connector.connect(host="localhost",
-                                         database="SEE_INV_withflask",
-                                         user="root",
-                                         password="root@123")
-    if connection.is_connected():
-        db_Info = connection.get_server_info()
-        print("Connected to MySQL Server version ", db_Info)
-        cursor = connection.cursor(buffered=True)
-        cursor.execute("select database();")
-        record = cursor.fetchone()
-        print("You're connected to database: ", record)
-except Error as e:
-    print("Error while connecting to MySQL", e)
+from sqlalchemy import create_engine
+# cursor,connection = None,None
+# try:
+#     connection = mysql.connector.connect(host="localhost",
+#                                          database="SEE_INV_withflask",
+#                                          user="root",
+#                                          password="root@123")
+#     if connection.is_connected():
+#         db_Info = connection.get_server_info()
+#         print("Connected to MySQL Server version ", db_Info)
+#         cursor = connection.cursor(buffered=True)
+#         cursor.execute("select database();")
+#         record = cursor.fetchone()
+#         print("You're connected to database: ", record)
+# except Error as e:
+#     print("Error while connecting to MySQL", e)
 
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'any-secret-key-you-choose'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///invi-system.db'
+engine = create_engine('mysql+pymysql://root:root@123@localhost/SEE_INV_withflask')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@123@localhost/SEE_INV_withflask'
 #
 
@@ -325,52 +327,50 @@ def faculty_dashboard():
 
 @app.route("/faculty-home/edit", methods=['GET', 'POST'])
 def edit_profile():
-    fac_id = int(request.args.get("fac_id"))
-    current_faculty = Faculty.query.get(fac_id)
+    faculty_id = request.args.get("faculty_id")
+    current_faculty = Faculty.query.get(faculty_id)
     if current_faculty:
         form = FacultyForm(
-            fac_id=int(current_faculty.fac_id),
-            fac_email=current_faculty.fac_email,
-            fac_fname=current_faculty.fac_fname,
-            fac_mname=current_faculty.fac_mname,
-            fac_lname=current_faculty.fac_lname,
+            faculty_id=current_faculty.fac_id,
+            email=current_faculty.email,
+            f_name=current_faculty.f_name,
+            m_name=current_faculty.m_name,
+            l_name=current_faculty.l_name,
             phone_no=current_faculty.phone_no,
-            dept_id=str(current_faculty.dept_id),
-            dept_name=current_faculty.dept_name
+            dept_id=current_faculty.dept_id,
         )
         if form.validate_on_submit():
-            current_faculty.fac_email = form.fac_email.data
-            current_faculty.fac_fname = form.fac_fname.data
-            current_faculty.fac_mname = form.fac_mname.data
-            current_faculty.fac_lname = form.fac_lname.data
+            current_faculty.email = form.email.data
+            current_faculty.f_name = form.f_name.data
+            current_faculty.m_name = form.fac_mname.data
+            current_faculty.l_name = form.fac_lname.data
             current_faculty.phone_no = form.phone_no.data
-            current_faculty.dept_id = str(form.dept_id.data)
-            current_faculty.dept_name = form.dept_name.data
+            current_faculty.dept_id = form.dept_id.data
             db.session.commit()
-            new_fac_id = int(form.fac_id.data)
-            return redirect(url_for("faculty_dashboard", fac_id=new_fac_id))
-        return render_template("add_details.html", form=form, display_name=current_faculty.fac_fname)
+            new_fac_id = form.faculty_id.data
+            return redirect(url_for("faculty_dashboard", faculty_id=new_fac_id))
+        return render_template("add_details.html", form=form, display_name=current_faculty.f_name)
 
 
 @app.route("/faculty-home/view")
 def view_profile():
-    fac_id = int(request.args.get("fac_id"))
-    current_faculty = Faculty.query.get(fac_id)
-    heading = f"{current_faculty.fac_fname} {current_faculty.fac_mname} {current_faculty.fac_lname}'s Saved Details"
+    faculty_id = request.args.get("fac_id")
+    current_faculty = Faculty.query.get(faculty_id)
+    heading = f"{current_faculty.f_name} {current_faculty.m_name} {current_faculty.l_name}'s Saved Details"
     return render_template("faculty_details.html", cf=current_faculty, table_heading=heading)
 
 
 @app.route("/faculty-home/swap-request", methods=['GET', 'POST'])
 def swap_request():
-    fac_id = int(request.args.get("fac_id"))
-    current_faculty = Faculty.query.get(fac_id)
+    faculty_id = request.args.get("faculty_id")
+    current_faculty = Faculty.query.get(faculty_id)
     if current_faculty:
         form = SwapRequestForm(
-            cur_fac_id=int(current_faculty.fac_id),
+            cur_fac_id=current_faculty.fac_id,
         )
         if form.validate_on_submit():
             new_record = SwappingTable(
-                curr_fac_id=int(form.curr_fac_id.data),
+                curr_fac_id=form.curr_fac_id.data,
                 other_fac_id=form.other_fac_id.data,
                 old_date=form.old_date.data,
                 new_date=form.new_date.data,
@@ -387,17 +387,17 @@ def swap_request():
             db.session.commit()
             curr_fac_id = int(form.curr_fac_id.data)
             return redirect(url_for("faculty_dashboard", fac_id=curr_fac_id))
-        return render_template("add_details.html", form=form, display_name=current_faculty.fac_fname)
+        return render_template("add_details.html", form=form, display_name=current_faculty.f_name)
 
 
 @app.route('/admin-assign', methods=['GET', 'POST'])
 def admin_assign():
     form = AdminForm()
     if form.validate_on_submit():
-        fac_id = form.fac_id.data
-        group_id = int(form.group_id.data)
-        dept_id = str(form.dept_id.data)
-        faculty_to_edit = Faculty.query.filter_by(fac_id=fac_id).first()
+        faculty_id = form.faculty_id.data
+        group_id = form.group_id.data
+        dept_id = form.dept_id.data
+        faculty_to_edit = Faculty.query.filter_by(faculty_id=faculty_id).first()
         if faculty_to_edit:
             faculty_to_edit.group_id = group_id
             # new_allotment = Faculty(
@@ -411,8 +411,8 @@ def admin_assign():
             #     exam_year=form.exam_year.data,
             #     subject_code=form.subject_code.data
             # )
-            query = "UPDATE faculty SET group_id = :group_id WHERE fac_id = :fac_id AND dept_id = :dept_id"
-            cursor.execute(query)
+            with engine.connect() as con:
+                con.execute("UPDATE faculty SET group_id = %s WHERE faculty_id = %s AND dept_id = %s", group_id, faculty_id, dept_id)
             return redirect(url_for('admin'))
     return render_template("add_details.html", form=form, display_name="Admin! Add/Update Faculty details below.")
 

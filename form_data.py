@@ -46,15 +46,9 @@ class FacultyForm(FlaskForm):
 
 
 class AdminForm(FlaskForm):
-    fac_id = StringField('Faculty Id', validators=[DataRequired()])
+    faculty_id = StringField('Faculty Id', validators=[DataRequired()])
     group_id = StringField('Group Id', validators=[DataRequired()])
     dept_id = StringField('Dept Id', validators=[DataRequired()])
-    faculty_role = SelectField('Faculty Role', choices=FACULTY_ROLE, validators=[DataRequired()])
-    date = StringField('Date (DD/MM/YYYY)', validators=[DataRequired()])
-    timeslot = StringField('Time Slot (HH:MM - HH:MM)(24 Hr)', validators=[DataRequired()])
-    exam_type = SelectField('Exam Type', choices=EXAM_TYPE, validators=[DataRequired()])
-    exam_year = SelectField('Exam Year', choices=EXAM_YEAR, validators=[DataRequired()])
-    subject_code = SelectField('Subject Code', choices=SUBJECT_CODES, validators=[DataRequired()])
     submit = SubmitField('Submit')
 
 
