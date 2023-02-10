@@ -20,8 +20,9 @@ import matplotlib.pyplot as plt
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'any-secret-key-you-choose'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///invi-system.db'
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:toor@localhost/users'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///invi-system.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@123@localhost/SEE_INV_withflask'
+#
 
 # app.config['SQLALCHEMY_BINDS'] = {'faculty': 'sqlite:///faculty.db',
 #                                   'subject': 'sqlite:///subject.db',
@@ -42,49 +43,119 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(100))
     username = db.Column(db.String(1000))
 
+class Department(db.Model):
+    # __bind_key__ = 'departments'
+    dept_id = db.Column(db.String(10), primary_key=True)
+    dept_name = db.Column(db.String(100), unique=True, nullable=False)
+    floors = db.Column(db.Integer, unique=False, nullable=False)
+
+class Classroom(db.Model):
+    # __bind_key__ = 'classroom'
+    classroom_id = db.Column(db.String(10), primary_key=True)
+    capacity = db.Column(db.Integer, unique=False, nullable=False)
+    dept_id = db.Column(db.String(10), db.ForeignKey('department.dept_id'), primary_key=True)
+
+# class Faculty(db.Model):
+#     # __bind_key__ = 'faculty'
+#     fac_id = db.Column(db.Integer, primary_key=True)
+#     fac_email = db.Column(db.String(250), unique=True, nullable=False)
+#     fac_fname = db.Column(db.String(250), unique=False, nullable=False)
+#     fac_mname = db.Column(db.String(250), unique=False, nullable=False)
+#     fac_lname = db.Column(db.String(250), unique=False, nullable=False)
+#     group_id = db.Column(db.Integer, unique=False, nullable=False)
+#     phone_no = db.Column(db.Integer, unique=True, nullable=False)
+#     dept_id = db.Column(db.String(250), db.ForeignKey('department.dept_id'))
+#     # dept_name = db.Column(db.String(250), unique=False, nullable=False)
+#     #
+#     # fac_admin_foreign = db.Column(db.Integer, db.ForeignKey('admin.fac_id'))
+
+class Exam(db.Model):
+    # __bind_key__ = 'exam'
+    academic_year = db.Column(db.String(4), primary_key=True,nullable=False)
+    exam_type = db.Column(db.String(15), primary_key=True,nullable=False)
 
 class Faculty(db.Model):
     # __bind_key__ = 'faculty'
-    fac_id = db.Column(db.Integer, primary_key=True)
-    fac_email = db.Column(db.String(250), unique=True, nullable=False)
-    fac_fname = db.Column(db.String(250), unique=False, nullable=False)
-    fac_mname = db.Column(db.String(250), unique=False, nullable=False)
-    fac_lname = db.Column(db.String(250), unique=False, nullable=False)
-    group_id = db.Column(db.Integer, unique=False, nullable=False)
-    phone_no = db.Column(db.Integer, unique=True, nullable=False)
-    dept_id = db.Column(db.Integer, unique=False, nullable=False)
-    dept_name = db.Column(db.String(250), unique=False, nullable=False)
-
-    fac_admin_foreign = db.Column(db.Integer, db.ForeignKey('admin.fac_id'))
-
+    faculty_id = db.Column(db.String(10), primary_key=True)
+    f_name = db.Column(db.String(100), unique=False, nullable=False)
+    m_name = db.Column(db.String(100), unique=False, nullable=False)
+    l_name = db.Column(db.String(100), unique=False, nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    phone_no = db.Column(db.String(10), unique=True, nullable=False)
+    group_id = db.Column(db.String(10), unique=False, nullable=False)
+    invig_count = db.Column(db.Integer, unique=False, nullable=False)
+    special_count = db.Column(db.Integer, unique=False, nullable=False)
+    dept_id = db.Column(db.String(10), db.ForeignKey('department.dept_id'),primary_key=True)
 
 class Subject(db.Model):
     # __bind_key__ = 'subject'
-    sub_id = db.Column(db.Integer, primary_key=True)
-    sub_name = db.Column(db.String(250), unique=False, nullable=False)
-    sub_duration = db.Column(db.Integer, unique=False, nullable=False)
-    academic_year = db.Column(db.Integer, unique=False, nullable=False)
-    classroom_no = db.Column(db.String(250), unique=False, nullable=False)
+    subject_id = db.Column(db.String(10), primary_key=True)
+    subject_name = db.Column(db.String(100), unique=False, nullable=False)
+    subject_duration = db.Column(db.String(15), unique=False, nullable=False)
+
+# class Exam(db.Model):
+#     # __bind_key__ = 'exam'
+#     academic_year = db.Column(db.String(4), primary_key=True)
+#     exam_type = db.Column(db.String(250), primary_key=True)
+
+class Enrolled(db.Model):
+    #  __bind_key__ = 'enrolled'
+    academic_year = db.Column(db.String(4), db.ForeignKey('exam.academic_year'), primary_key=True)
+    exam_type = db.Column(db.String(15), db.ForeignKey('exam.exam_type'), primary_key=True)
+    subject_id = db.Column(db.String(10), db.ForeignKey('subject.subject_id'), primary_key=True)
+    students_enrolled = db.Column(db.Integer, unique=False, nullable=False)
+
+class Invigilates(db.Model):
+    # __bind_key__ = 'invigilation'
+    faculty_id = db.Column(db.String(10), db.ForeignKey('faculty.faculty_id'), primary_key=True)
+    academic_year = db.Column(db.String(4), db.ForeignKey('exam.academic_year'), primary_key=True)
+    exam_type = db.Column(db.String(15), db.ForeignKey('exam.exam_type'), primary_key=True)
+    classroom_id = db.Column(db.String(10), db.ForeignKey('classroom.classroom_id'), primary_key=True)
+    department_id = db.Column(db.String(10), db.ForeignKey('department.dept_id'), primary_key=True)
+    subject_id = db.Column(db.String(10), db.ForeignKey('subject.subject_id'), primary_key=True)
+
+class Has_exam(db.Model):
+    # __bind_key__ = 'has_exam'
+    academic_year = db.Column(db.String(4), db.ForeignKey('exam.academic_year'), primary_key=True)
+    exam_type = db.Column(db.String(15), db.ForeignKey('exam.exam_type'), primary_key=True)
+    subject_id = db.Column(db.String(10), db.ForeignKey('subject.subject_id'), primary_key=True)
+    required_invigilators = db.Column(db.Integer, unique=False, nullable=True)
+    exam_date = db.Column(db.Date, unique=False, nullable=True)
+
+class Assigned_classrooms(db.Model):
+    # __bind_key__ = 'assigned_classrooms'
+    classroom_id = db.Column(db.String(10), db.ForeignKey('classroom.classroom_id'), primary_key=True)
+    subject_id = db.Column(db.String(10), db.ForeignKey('subject.subject_id'), primary_key=True)
+    exam_type = db.Column(db.String(15), db.ForeignKey('exam.exam_type'), primary_key=True)
+    academic_year = db.Column(db.String(4), db.ForeignKey('exam.academic_year'), primary_key=True)
+    department_id = db.Column(db.String(10), db.ForeignKey('department.dept_id'), primary_key=True)
+# class Subject(db.Model):
+#     # __bind_key__ = 'subject'
+#     sub_id = db.Column(db.Integer, primary_key=True)
+#     sub_name = db.Column(db.String(250), unique=False, nullable=False)
+#     sub_duration = db.Column(db.Integer, unique=False, nullable=False)
+#     academic_year = db.Column(db.Integer, unique=False, nullable=False)
+#     classroom_no = db.Column(db.String(250), unique=False, nullable=False)
 
 
-class Admin(db.Model):
-    # __bind_key__ = 'inviDuty'
-    entry_id = db.Column(db.Integer, primary_key=True)
-    fac_id = db.Column(db.Integer, unique=False, nullable=False)
-    group_id = db.Column(db.String(250), unique=False, nullable=False)
-    dept_id = db.Column(db.String(250), unique=False, nullable=False)
-    date = db.Column(db.String(250), unique=False, nullable=False)
-    timeslot = db.Column(db.String(250), unique=False, nullable=False)
-    exam_type = db.Column(db.String(250), unique=False, nullable=False)
-    exam_year = db.Column(db.String(250), unique=False, nullable=False)
-    faculty_role = db.Column(db.String(250), unique=False, nullable=False)
-    subject_code = db.Column(db.String(250), unique=False, nullable=False)
-    invigilators = db.relationship("Faculty", backref="admin")
+# class Admin(db.Model):
+#     # __bind_key__ = 'inviDuty'
+#     entry_id = db.Column(db.Integer, primary_key=True)
+#     fac_id = db.Column(db.Integer, unique=False, nullable=False)
+#     group_id = db.Column(db.String(250), unique=False, nullable=False)
+#     dept_id = db.Column(db.String(250), unique=False, nullable=False)
+#     date = db.Column(db.String(250), unique=False, nullable=False)
+#     timeslot = db.Column(db.String(250), unique=False, nullable=False)
+#     exam_type = db.Column(db.String(250), unique=False, nullable=False)
+#     exam_year = db.Column(db.String(250), unique=False, nullable=False)
+#     # faculty_role = db.Column(db.String(250), unique=False, nullable=False)
+#     subject_code = db.Column(db.String(250), unique=False, nullable=False)
+#     invigilators = db.relationship("Faculty", backref="admin")
 
 
-class Departments(db.Model):
-    dept_id = db.Column(db.String(250), primary_key=True)
-    dept_name = db.Column(db.String(250), unique=True, nullable=True)
+# class Departments(db.Model):
+#     dept_id = db.Column(db.String(250), primary_key=True)
+#     dept_name = db.Column(db.String(250), unique=True, nullable=True)
 
 
 class SwappingTable(db.Model):
@@ -172,7 +243,7 @@ def add_faculty():
     )
     if form.validate_on_submit():
         new_faculty = Faculty(
-            fac_id=int(form.fac_id.data),
+            fac_id=form.fac_id.data,
             fac_email=form.fac_email.data,
             fac_fname=form.fac_fname.data,
             fac_mname=form.fac_mname.data,
@@ -302,30 +373,30 @@ def swap_request():
 
 
 @app.route('/admin-assign', methods=['GET', 'POST'])
-def admin_assign():
-    form = AdminForm()
-    if form.validate_on_submit():
-        fac_id = form.fac_id.data
-        group_id = int(form.group_id.data)
-        dept_id = str(form.dept_id.data)
-        faculty_to_edit = Faculty.query.filter_by(fac_id=fac_id).first()
-        if faculty_to_edit:
-            faculty_to_edit.group_id = group_id
-            new_allotment = Admin(
-                fac_id=fac_id,
-                group_id=group_id,
-                dept_id=dept_id,
-                faculty_role=form.faculty_role.data,
-                date=form.date.data,
-                timeslot=form.timeslot.data,
-                exam_type=form.exam_type.data,
-                exam_year=form.exam_year.data,
-                subject_code=form.subject_code.data
-            )
-            db.session.add(new_allotment)
-            db.session.commit()
-            return redirect(url_for('admin'))
-    return render_template("add_details.html", form=form, display_name="Admin! Add/Update Faculty details below.")
+# def admin_assign():
+#     form = AdminForm()
+#     if form.validate_on_submit():
+#         fac_id = form.fac_id.data
+#         group_id = int(form.group_id.data)
+#         dept_id = str(form.dept_id.data)
+#         faculty_to_edit = Faculty.query.filter_by(fac_id=fac_id).first()
+#         if faculty_to_edit:
+#             faculty_to_edit.group_id = group_id
+#             new_allotment = Admin(
+#                 fac_id=fac_id,
+#                 group_id=group_id,
+#                 dept_id=dept_id,
+#                 faculty_role=form.faculty_role.data,
+#                 date=form.date.data,
+#                 timeslot=form.timeslot.data,
+#                 exam_type=form.exam_type.data,
+#                 exam_year=form.exam_year.data,
+#                 subject_code=form.subject_code.data
+#             )
+#             db.session.add(new_allotment)
+#             db.session.commit()
+#             return redirect(url_for('admin'))
+#     return render_template("add_details.html", form=form, display_name="Admin! Add/Update Faculty details below.")
 
 
 @app.route('/admin/view-faculties')
@@ -341,9 +412,9 @@ def view_faculty_dept():
 
 
 @app.route('/view-invi-report')
-def view_invi_report():
-    all_faculty = Admin.query.order_by("date").all()
-    return render_template("view_invi_report.html", all_faculty=all_faculty, table_heading="All Faculty's Exam Duties")
+# def view_invi_report():
+#     all_faculty = Admin.query.order_by("date").all()
+#     return render_template("view_invi_report.html", all_faculty=all_faculty, table_heading="All Faculty's Exam Duties")
 
 
 @app.route('/admin/view-swap-requests', methods=['GET', 'POST'])

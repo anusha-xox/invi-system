@@ -1,23 +1,23 @@
 import mysql.connector
 from mysql.connector import Error
 
-connection = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    passwd="toor"
-)
-
-print(connection.is_connected())
-cursor = connection.cursor()
-
-cursor.execute("CREATE DATABASE users")
+# connection = mysql.connector.connect(
+#     host="localhost",
+#     user="root",
+#     passwd="root@123"
+# )
+#
+# print(connection.is_connected())
+# cursor = connection.cursor()
+#
+# cursor.execute("CREATE DATABASE users")
 
 try:
     connection = mysql.connector.connect(
         host="localhost",
         user="root",
         database="users",
-        password="toor")
+        password="root@123")
     if connection.is_connected():
         db_Info = connection.get_server_info()
         print("Connected to MySQL Server version ", db_Info)

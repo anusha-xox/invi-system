@@ -15,7 +15,7 @@ DEPARTMENT_NAMES = ["Aerospace Engineering", "Biotechnology", "Chemical Engineer
 
 FACULTY_ROLE = ["Room Superintendent", "Deputy Room Superintendent", "Squad Team"]
 EXAM_TYPE = ["Regular", "Fasttrack", "Make Up"]
-EXAM_YEAR = ["2016-17", "2017-18", "2018-19", "2019-20", "2020-21", "2021-22", "2022-23"]
+EXAM_YEAR = ["2016", "2017", "2018", "2019", "2020", "2021", "2022"]
 SUBJECT_CODES = ["18MA11", "18PH12", "18EE13", "18CV14", "18EE15", "18ME16", "18HS17"]
 
 
@@ -40,7 +40,8 @@ class FacultyForm(FlaskForm):
     fac_lname = StringField('Last name')
     phone_no = StringField('Phone Number', validators=[DataRequired()])
     dept_id = StringField('Department Id', validators=[DataRequired()])
-    dept_name = SelectField('Department Name', choices=DEPARTMENT_NAMES, validators=[DataRequired()])
+
+    # dept_name = SelectField('Department Name', choices=DEPARTMENT_NAMES, validators=[DataRequired()])
     submit = SubmitField('Submit')
 
 
