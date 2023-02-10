@@ -18,17 +18,19 @@
       <th scope="col">Middle name</th>
       <th scope="col">Last name</th>
       <th scope="col">Phone Number</th>
+        <th scope="col">Department Id</th>
     </tr>
   </thead>
   <tbody>
     {% for fac in all_faculty: %}
     <tr>
-      <th scope="row">{{fac.fac_id}}</th>
-      <td>{{ fac.fac_email }}</td>
-      <td>{{ fac.fac_fname }}</td>
-      <td>{{ fac.fac_mname }}</td>
-      <td>{{ fac.fac_lname }}</td>
+      <th scope="row">{{fac.faculty_id}}</th>
+      <td>{{ fac.email }}</td>
+      <td>{{ fac.f_name }}</td>
+      <td>{{ fac.m_name }}</td>
+      <td>{{ fac.l_name }}</td>
       <td>{{ fac.phone_no }}</td>
+      <td>{{ fac.dept_id }}</td>>
     </tr>
     {% endfor %}
   </tbody>

@@ -16,6 +16,23 @@ from flask import Response
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
+import mysql.connector
+from mysql.connector import Error
+
+try:
+    connection = mysql.connector.connect(host="localhost",
+                                         database="SEE_INV_withflask",
+                                         user="root",
+                                         password="root@123")
+    if connection.is_connected():
+        db_Info = connection.get_server_info()
+        print("Connected to MySQL Server version ", db_Info)
+        cursor = connection.cursor(buffered=True)
+        cursor.execute("select database();")
+        record = cursor.fetchone()
+        print("You're connected to database: ", record)
+except Error as e:
+    print("Error while connecting to MySQL", e)
 
 app = Flask(__name__)
 
@@ -283,7 +300,7 @@ def admin():
 
 @app.route("/faculty-home", methods=['GET', 'POST'])
 def faculty_dashboard():
-    fac_id = int(request.args.get("fac_id"))
+    fac_id = request.args.get("fac_id")
     current_faculty = Faculty.query.get(fac_id)
     if current_faculty:
         FACULTY_OPTIONS = [
@@ -374,30 +391,30 @@ def swap_request():
 
 
 @app.route('/admin-assign', methods=['GET', 'POST'])
-# def admin_assign():
-#     form = AdminForm()
-#     if form.validate_on_submit():
-#         fac_id = form.fac_id.data
-#         group_id = int(form.group_id.data)
-#         dept_id = str(form.dept_id.data)
-#         faculty_to_edit = Faculty.query.filter_by(fac_id=fac_id).first()
-#         if faculty_to_edit:
-#             faculty_to_edit.group_id = group_id
-#             new_allotment = Admin(
-#                 fac_id=fac_id,
-#                 group_id=group_id,
-#                 dept_id=dept_id,
-#                 faculty_role=form.faculty_role.data,
-#                 date=form.date.data,
-#                 timeslot=form.timeslot.data,
-#                 exam_type=form.exam_type.data,
-#                 exam_year=form.exam_year.data,
-#                 subject_code=form.subject_code.data
-#             )
-#             db.session.add(new_allotment)
-#             db.session.commit()
-#             return redirect(url_for('admin'))
-#     return render_template("add_details.html", form=form, display_name="Admin! Add/Update Faculty details below.")
+def admin_assign():
+    form = AdminForm()
+    if form.validate_on_submit():
+        fac_id = form.fac_id.data
+        group_id = int(form.group_id.data)
+        dept_id = str(form.dept_id.data)
+        faculty_to_edit = Faculty.query.filter_by(fac_id=fac_id).first()
+        if faculty_to_edit:
+            faculty_to_edit.group_id = group_id
+            # new_allotment = Faculty(
+            #     fac_id=fac_id,
+            #     group_id=group_id,
+            #     dept_id=dept_id,
+            #     faculty_role=form.faculty_role.data,
+            #     date=form.date.data,
+            #     timeslot=form.timeslot.data,
+            #     exam_type=form.exam_type.data,
+            #     exam_year=form.exam_year.data,
+            #     subject_code=form.subject_code.data
+            # )
+            query = "UPDATE faculty SET group_id = :group_id WHERE fac_id = :fac_id AND dept_id = :dept_id"
+            cursor.execute(query)
+            return redirect(url_for('admin'))
+    return render_template("add_details.html", form=form, display_name="Admin! Add/Update Faculty details below.")
 
 
 @app.route('/admin/view-faculties')
@@ -413,9 +430,9 @@ def view_faculty_dept():
 
 
 @app.route('/view-invi-report')
-# def view_invi_report():
-#     all_faculty = Admin.query.order_by("date").all()
-#     return render_template("view_invi_report.html", all_faculty=all_faculty, table_heading="All Faculty's Exam Duties")
+def view_invi_report():
+    all_faculty = Faculty.query.all()
+    return render_template("view_invi_report.html", all_faculty=all_faculty, table_heading="All Faculty's Exam Duties")
 
 
 @app.route('/admin/view-swap-requests', methods=['GET', 'POST'])

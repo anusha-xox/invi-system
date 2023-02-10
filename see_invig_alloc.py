@@ -10,7 +10,7 @@ from mysql.connector import Error
 def connect():
     try:
         connection = mysql.connector.connect(host="localhost",
-                                             database="SEE_INV",
+                                             database="SEE_INV_withflask",
                                              user="root",
                                              password="root@123")
         if connection.is_connected():
