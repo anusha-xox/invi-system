@@ -245,9 +245,9 @@ def login():
                 login_user(user)
                 # return redirect(url_for('add_faculty', display_name=user.username))
                 for f in Faculty.query.all():
-                    if user.email == f.fac_email:
+                    if user.email == f.email:
                         # return redirect(url_for('add_faculty', display_name=user.username))
-                        return redirect(url_for("faculty_dashboard", fac_id=f.fac_id))
+                        return redirect(url_for("faculty_dashboard", faculty_id=f.faculty_id, dept_id=f.dept_id))
                     # else:
                     #     return redirect(url_for('add_faculty', display_name=user.username, default_email=user.email))
     return render_template('enter.html', form=form, title_given="Login")
@@ -302,8 +302,9 @@ def admin():
 
 @app.route("/faculty-home", methods=['GET', 'POST'])
 def faculty_dashboard():
-    fac_id = request.args.get("fac_id")
-    current_faculty = Faculty.query.get(fac_id)
+    faculty_id = request.args.get("faculty_id")
+    dept_id = request.args.get("dept_id")
+    current_faculty = Faculty.query.filter_by(faculty_id=faculty_id).filter_by(dept_id=dept_id).first()
     if current_faculty:
         FACULTY_OPTIONS = [
             "Edit Profile",
@@ -312,26 +313,29 @@ def faculty_dashboard():
             "Request Swap from Admin",
         ]
         FACULTY_LINKS = [
-            url_for('edit_profile', fac_id=fac_id),
-            url_for('view_profile', fac_id=fac_id),
+            url_for('edit_profile', faculty_id=faculty_id, dept_id=dept_id),
+            url_for('view_profile', faculty_id=faculty_id, dept_id=dept_id),
             url_for("view_invi_report"),
-            url_for("swap_request", fac_id=fac_id)]
+            url_for("swap_request", faculty_id=faculty_id, dept_id=dept_id)]
         return render_template(
             "grid.html",
-            title=current_faculty.fac_fname,
+            title=current_faculty.f_name + " " + current_faculty.l_name,
             grid_options=FACULTY_OPTIONS,
             grid_links=FACULTY_LINKS,
-            grid_no=len(FACULTY_OPTIONS)
+            grid_no=len(FACULTY_OPTIONS),
+            faculty_id=faculty_id,
+            dept_id=dept_id
         )
 
 
 @app.route("/faculty-home/edit", methods=['GET', 'POST'])
 def edit_profile():
     faculty_id = request.args.get("faculty_id")
-    current_faculty = Faculty.query.get(faculty_id)
+    dept_id = request.args.get("dept_id")
+    current_faculty = Faculty.query.filter_by(faculty_id=faculty_id).filter_by(dept_id=dept_id).first()
     if current_faculty:
         form = FacultyForm(
-            faculty_id=current_faculty.fac_id,
+            faculty_id=current_faculty.faculty_id,
             email=current_faculty.email,
             f_name=current_faculty.f_name,
             m_name=current_faculty.m_name,
@@ -348,14 +352,16 @@ def edit_profile():
             current_faculty.dept_id = form.dept_id.data
             db.session.commit()
             new_fac_id = form.faculty_id.data
-            return redirect(url_for("faculty_dashboard", faculty_id=new_fac_id))
+            new_dept_id = form.dept_id.data
+            return redirect(url_for("faculty_dashboard", faculty_id=new_fac_id,dept_id=new_dept_id))
         return render_template("add_details.html", form=form, display_name=current_faculty.f_name)
 
 
 @app.route("/faculty-home/view")
 def view_profile():
-    faculty_id = request.args.get("fac_id")
-    current_faculty = Faculty.query.get(faculty_id)
+    faculty_id = request.args.get("faculty_id")
+    dept_id = request.args.get("dept_id")
+    current_faculty = Faculty.query.filter_by(faculty_id=faculty_id).filter_by(dept_id=dept_id).first()
     heading = f"{current_faculty.f_name} {current_faculty.m_name} {current_faculty.l_name}'s Saved Details"
     return render_template("faculty_details.html", cf=current_faculty, table_heading=heading)
 
