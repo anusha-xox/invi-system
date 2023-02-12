@@ -5,9 +5,9 @@ from mysql.connector import Error
 def run_the_algo():
     try:
         connection = mysql.connector.connect(host="localhost",
-                                             database="SEE_INV_withflask_tryingalgo",
+                                             database="SEE_INV_withflask",
                                              user="root",
-                                             password="root@123")
+                                             password="toor")
         if connection.is_connected():
             db_Info = connection.get_server_info()
             print("Connected to MySQL Server version ", db_Info)
@@ -63,5 +63,6 @@ def run_the_algo():
     plt.title('Faculty vs Invigilator Count')
     plt.savefig('static/img/algo_plot.png')
 
+run_the_algo()
 
 

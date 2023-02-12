@@ -9,7 +9,8 @@ import pymysql
 import cryptography
 from flask_bootstrap import Bootstrap
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from form_data import LoginForm, RegisterForm, FacultyForm, AdminForm, SubjectForm, SwapRequestForm, DEPARTMENT_NAMES, DEPARTMENT_IDS
+from form_data import LoginForm, RegisterForm, FacultyForm, AdminForm, SubjectForm, SwapRequestForm, DEPARTMENT_NAMES, \
+    DEPARTMENT_IDS
 ## for graph
 import io
 from flask import Response
@@ -20,6 +21,7 @@ import mysql.connector
 from mysql.connector import Error
 from sqlalchemy import create_engine
 import run as r
+
 # cursor,connection = None,None
 # try:
 #     connection = mysql.connector.connect(host="localhost",
@@ -40,8 +42,8 @@ app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'any-secret-key-you-choose'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///invi-system.db'
-engine = create_engine('mysql+pymysql://root:root@123@localhost/SEE_INV_withflask_tryingalgo')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@123@localhost/SEE_INV_withflask_tryingalgo'
+engine = create_engine('mysql+pymysql://root:toor@localhost/SEE_INV_withflask')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:toor@localhost/SEE_INV_withflask'
 #
 
 # app.config['SQLALCHEMY_BINDS'] = {'faculty': 'sqlite:///faculty.db',
@@ -57,8 +59,8 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 with engine.connect() as con:
-    con.execute("CREATE DATABASE IF NOT EXISTS SEE_INV_withflask_tryingalgo")
-    con.execute("USE SEE_INV_withflask_tryingalgo")
+    con.execute("CREATE DATABASE IF NOT EXISTS SEE_INV_withflask")
+    con.execute("USE SEE_INV_withflask")
     con.execute("CREATE TABLE IF NOT EXISTS `user` (`id` int NOT NULL AUTO_INCREMENT,`email` varchar(100) DEFAULT NULL,`password` varchar(100) DEFAULT NULL,`username` varchar(1000) DEFAULT NULL,PRIMARY KEY (`id`),UNIQUE KEY `email` (`email`))")
     con.execute("CREATE TABLE IF NOT EXISTS `department` (`dept_id` varchar(250) NOT NULL,`dept_name` varchar(250) NOT NULL,`floors` int NOT NULL,PRIMARY KEY (`dept_id`),UNIQUE KEY `dept_name` (`dept_name`))")
     con.execute("CREATE TABLE IF NOT EXISTS `classroom` (   `classroom_id` varchar(250) NOT NULL,   `capacity` int NOT NULL,   `dept_id` varchar(250) NOT NULL,   PRIMARY KEY (`classroom_id`,`dept_id`),   KEY `dept_id` (`dept_id`),   CONSTRAINT `classroom_ibfk_1` FOREIGN KEY (`dept_id`) REFERENCES `department` (`dept_id`) )")
@@ -67,8 +69,10 @@ with engine.connect() as con:
     con.execute("CREATE TABLE IF NOT EXISTS `EXAM` (   `academic_year` varchar(4) NOT NULL,   `exam_type` varchar(15) NOT NULL,   PRIMARY KEY (`academic_year`,`exam_type`) )")
     con.execute("CREATE TABLE IF NOT EXISTS `enrolled` (   `Academic_Year` varchar(4) NOT NULL,   `Exam_Type` varchar(20) NOT NULL,   `Subject_ID` varchar(10) NOT NULL,   `students_enrolled` int DEFAULT NULL,   PRIMARY KEY (`Academic_Year`,`Exam_Type`,`Subject_ID`),   KEY `Subject_ID` (`Subject_ID`),   CONSTRAINT `enrolled_ibfk_1` FOREIGN KEY (`Academic_Year`, `Exam_Type`) REFERENCES `exam` (`academic_year`, `exam_type`) ON DELETE CASCADE,   CONSTRAINT `enrolled_ibfk_2` FOREIGN KEY (`Subject_ID`) REFERENCES `subject` (`subject_id`) )")
     con.execute("CREATE TABLE IF NOT EXISTS `invigilates` (   `faculty_id` varchar(10) NOT NULL,   `academic_year` varchar(4) NOT NULL,   `exam_type` varchar(15) NOT NULL,   `classroom_id` varchar(10) NOT NULL,   `department_id` varchar(10) NOT NULL,   `subject_id` varchar(10) NOT NULL,   PRIMARY KEY (`faculty_id`,`academic_year`,`exam_type`,`classroom_id`,`department_id`,`subject_id`),   KEY `academic_year` (`academic_year`,`exam_type`),   KEY `classroom_id` (`classroom_id`),   KEY `department_id` (`department_id`),   KEY `subject_id` (`subject_id`),   CONSTRAINT `invigilates_ibfk_1` FOREIGN KEY (`faculty_id`) REFERENCES `faculty` (`faculty_id`),   CONSTRAINT `invigilates_ibfk_2` FOREIGN KEY (`academic_year`, `exam_type`) REFERENCES `exam` (`academic_year`, `exam_type`),   CONSTRAINT `invigilates_ibfk_3` FOREIGN KEY(`classroom_id`) REFERENCES `classroom` (`classroom_id`),   CONSTRAINT `invigilates_ibfk_4` FOREIGN KEY (`department_id`) REFERENCES `department` (`dept_id`),   CONSTRAINT `invigilates_ibfk_5` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`) )")
+    con.execute("CREATE TABLE IF NOT EXISTS `student` (   `student_id` varchar(12) NOT NULL,   `st_f_name` varchar(50) DEFAULT NULL,   `st_l_name` varchar(50) DEFAULT NULL,   `academic_year` varchar(4) NOT NULL,   `exam_type` varchar(15) NOT NULL,   `subject_id` varchar(10) NOT NULL,   PRIMARY KEY (`student_id`,`academic_year`,`exam_type`,`subject_id`),   KEY `academic_year` (`academic_year`,`exam_type`),   KEY `subject_id` (`subject_id`),   CONSTRAINT `student_ibfk_1` FOREIGN KEY (`academic_year`, `exam_type`) REFERENCES `exam` (`academic_year`, `exam_type`),   CONSTRAINT `student_ibfk_2` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`) )")
     con.execute("CREATE TABLE IF NOT EXISTS `has_exam` (   `academic_year` varchar(4) NOT NULL,   `exam_type` varchar(15) NOT NULL,   `subject_id` varchar(10) NOT NULL,   `required_invigilators` int DEFAULT NULL,   `exam_date` date DEFAULT NULL,   PRIMARY KEY (`academic_year`,`exam_type`,`subject_id`),   KEY `subject_id` (`subject_id`),   CONSTRAINT `has_exam_ibfk_1` FOREIGN KEY (`academic_year`, `exam_type`) REFERENCES `exam` (`academic_year`, `exam_type`),   CONSTRAINT `has_exam_ibfk_2` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`) )")
     con.execute("CREATE TABLE IF NOT EXISTS `assigned_classrooms` (   `classroom_id` varchar(10) NOT NULL,   `subject_id` varchar(10) NOT NULL,   `exam_type` varchar(15) NOT NULL,   `academic_year` varchar(4) NOT NULL,   `department_id` varchar(10) NOT NULL,   PRIMARY KEY (`classroom_id`,`subject_id`,`exam_type`,`academic_year`,`department_id`),   KEY `subject_id` (`subject_id`),   KEY `academic_year` (`academic_year`,`exam_type`),   KEY `department_id` (`department_id`),   CONSTRAINT `assigned_classrooms_ibfk_1` FOREIGN KEY (`classroom_id`) REFERENCES `classroom` (`classroom_id`),   CONSTRAINT `assigned_classrooms_ibfk_2`FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`),   CONSTRAINT `assigned_classrooms_ibfk_3` FOREIGN KEY (`academic_year`, `exam_type`) REFERENCES `exam` (`academic_year`, `exam_type`),   CONSTRAINT `assigned_classrooms_ibfk_4` FOREIGN KEY (`department_id`) REFERENCES `department` (`dept_id`) )")
+
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -76,11 +80,13 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(100))
     username = db.Column(db.String(1000))
 
+
 class Department(db.Model):
     # __bind_key__ = 'departments'
     dept_id = db.Column(db.String(10), primary_key=True)
     dept_name = db.Column(db.String(100), unique=True, nullable=False)
     floors = db.Column(db.Integer, unique=False, nullable=False)
+
 
 class Classroom(db.Model):
     # __bind_key__ = 'classroom'
@@ -88,10 +94,12 @@ class Classroom(db.Model):
     capacity = db.Column(db.Integer, unique=False, nullable=False)
     dept_id = db.Column(db.String(10), db.ForeignKey('department.dept_id'), primary_key=True)
 
+
 class Exam(db.Model):
     # __bind_key__ = 'exam'
-    academic_year = db.Column(db.String(4), primary_key=True,nullable=False)
-    exam_type = db.Column(db.String(15), primary_key=True,nullable=False)
+    academic_year = db.Column(db.String(4), primary_key=True, nullable=False)
+    exam_type = db.Column(db.String(15), primary_key=True, nullable=False)
+
 
 class Faculty(db.Model):
     # __bind_key__ = 'faculty'
@@ -104,13 +112,15 @@ class Faculty(db.Model):
     group_id = db.Column(db.String(10), unique=False, nullable=False)
     invig_count = db.Column(db.Integer, unique=False, nullable=False)
     special_count = db.Column(db.Integer, unique=False, nullable=False)
-    dept_id = db.Column(db.String(10), db.ForeignKey('department.dept_id'),primary_key=True)
+    dept_id = db.Column(db.String(10), db.ForeignKey('department.dept_id'), primary_key=True)
+
 
 class Subject(db.Model):
     # __bind_key__ = 'subject'
     subject_id = db.Column(db.String(10), primary_key=True)
     subject_name = db.Column(db.String(100), unique=False, nullable=False)
     subject_duration = db.Column(db.String(15), unique=False, nullable=False)
+
 
 class Enrolled(db.Model):
     #  __bind_key__ = 'enrolled'
@@ -129,6 +139,7 @@ class Invigilates(db.Model):
     department_id = db.Column(db.String(10), db.ForeignKey('department.dept_id'), primary_key=True)
     subject_id = db.Column(db.String(10), db.ForeignKey('subject.subject_id'), primary_key=True)
 
+
 class Has_exam(db.Model):
     # __bind_key__ = 'has_exam'
     academic_year = db.Column(db.String(4), db.ForeignKey('exam.academic_year'), primary_key=True)
@@ -136,6 +147,7 @@ class Has_exam(db.Model):
     subject_id = db.Column(db.String(10), db.ForeignKey('subject.subject_id'), primary_key=True)
     required_invigilators = db.Column(db.Integer, unique=False, nullable=True)
     exam_date = db.Column(db.Date, unique=False, nullable=True)
+
 
 class Assigned_classrooms(db.Model):
     # __bind_key__ = 'assigned_classrooms'
@@ -164,6 +176,15 @@ class Assigned_classrooms(db.Model):
 # class Departments(db.Model):
 #     dept_id = db.Column(db.String(250), primary_key=True)
 #     dept_name = db.Column(db.String(250), unique=True, nullable=True)
+
+class Student(db.Model):
+    # _bind_key_ = 'student'
+    student_id = db.Column(db.String(10), primary_key=True)
+    st_f_name = db.Column(db.String(50), unique=False, nullable=False)
+    st_l_name = db.Column(db.String(50), unique=False, nullable=False)
+    academic_year = db.Column(db.String(4), db.ForeignKey('exam.academic_year'), primary_key=True)
+    exam_type = db.Column(db.String(15), db.ForeignKey('exam.exam_type'), primary_key=True)
+    subject_id = db.Column(db.String(10), db.ForeignKey('subject.subject_id'), primary_key=True)
 
 
 class SwappingTable(db.Model):
@@ -277,10 +298,10 @@ def admin():
         "Give Invigilator Duty",
         "View Swap Requests",
         "No of Faculties vs Department Plot",
-        "Invigilators vs Invigilation Count Plot"
+        "Invigilators vs Invigilation Count Plot",
     ]
     ADMIN_LINKS = [url_for('view_faculties'), url_for('view_faculty_dept'), url_for("view_invi_report"),
-                   url_for('admin_assign'), url_for("view_swap_requests"), url_for("plot"), url_for("algo-plot-admin")]
+                   url_for('admin_assign'), url_for("view_swap_requests"), url_for("plot"), url_for("admin_algo_plot")]
     return render_template(
         "grid.html",
         title="Admin",
@@ -341,7 +362,7 @@ def edit_profile():
             db.session.commit()
             new_fac_id = form.faculty_id.data
             new_dept_id = form.dept_id.data
-            return redirect(url_for("faculty_dashboard", faculty_id=new_fac_id,dept_id=new_dept_id))
+            return redirect(url_for("faculty_dashboard", faculty_id=new_fac_id, dept_id=new_dept_id))
         return render_template("add_details.html", form=form, display_name=current_faculty.f_name)
 
 
@@ -407,7 +428,8 @@ def admin_assign():
             #     subject_code=form.subject_code.data
             # )
             with engine.connect() as con:
-                con.execute("UPDATE faculty SET group_id = %s WHERE faculty_id = %s AND dept_id = %s", group_id, faculty_id, dept_id)
+                con.execute("UPDATE faculty SET group_id = %s WHERE faculty_id = %s AND dept_id = %s", group_id,
+                            faculty_id, dept_id)
             return redirect(url_for('admin'))
     return render_template("add_details.html", form=form, display_name="Admin! Add/Update Faculty details below.")
 
@@ -497,11 +519,12 @@ def about():
 def download():
     return send_from_directory(app.config['static-dark-old'], "files/cheat_sheet.pdf", as_attachment=True)
 
+
 @app.route('/admin/algo-plot', methods=["GET", "POST"])
 def admin_algo_plot():
     r.run_the_algo()
     return render_template("algo-plot-admin.html", url='static/img/algo_plot.png')
 
+
 if __name__ == "__main__":
     app.run(debug=True)
-
