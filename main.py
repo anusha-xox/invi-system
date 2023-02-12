@@ -9,7 +9,7 @@ import pymysql
 import cryptography
 from flask_bootstrap import Bootstrap
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from form_data import LoginForm, RegisterForm, FacultyForm, AdminForm, SubjectForm, SwapRequestForm, DEPARTMENT_NAMES
+from form_data import LoginForm, RegisterForm, FacultyForm, AdminForm, SubjectForm, SwapRequestForm, DEPARTMENT_NAMES, DEPARTMENT_IDS
 ## for graph
 import io
 from flask import Response
@@ -437,10 +437,10 @@ def view_swap_requests():
 @app.route('/plot')
 def plot():
     plt.switch_backend('agg')
-    grouped_up_data = db.session.query(Faculty.dept_name, func.count(Faculty.dept_name).label("total_count")).group_by(
-        Faculty.dept_name).all()
+    grouped_up_data = db.session.query(Faculty.dept_id, func.count(Faculty.dept_id).label("total_count")).group_by(
+        Faculty.dept_id).all()
     fields = [i[0] for i in grouped_up_data]
-    for i in DEPARTMENT_NAMES:
+    for i in DEPARTMENT_IDS:
         if i in fields:
             pass
         else:

@@ -12,6 +12,7 @@ DEPARTMENT_NAMES = ["Aerospace Engineering", "Biotechnology", "Chemical Engineer
                     "Industrial Engineering and Management", "Information Science and Engineering",
                     "Master of Computer Applications", "Mechanical Engineering", "Telecommunication Engineering",
                     "Basic Sciences"]
+DEPARTMENT_IDS = ["AE", "BT", "CH", "CV", "CSE", "ECE", "EEE", "EIE", "IME", "ISE", "MA", "ME", "TC", "BS"]
 
 FACULTY_ROLE = ["Room Superintendent", "Deputy Room Superintendent", "Squad Team"]
 EXAM_TYPE = ["Regular", "Fasttrack", "Make Up"]
