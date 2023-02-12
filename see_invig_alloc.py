@@ -3,27 +3,25 @@ import math
 import random
 import matplotlib.pyplot as plt
 
+
 import mysql.connector
 from mysql.connector import Error
-
-
 def connect():
     try:
-        connection = mysql.connector.connect(host="localhost",
-                                             database="SEE_INV_withflask",
-                                             user="root",
-                                             password="root@123")
+        connection = mysql.connector.connect(    host="localhost",
+        database="SEE_INV_withflask_tryingalgo",
+        user="root",
+        password="root@123")
         if connection.is_connected():
             db_Info = connection.get_server_info()
             print("Connected to MySQL Server version ", db_Info)
             cursor = connection.cursor(buffered=True)
             cursor.execute("select database();")
             record = cursor.fetchone()
-            print("You're connected to database: ", record)
-            return cursor, connection
+            return cursor,connection
+
     except Error as e:
         print("Error while connecting to MySQL", e)
-
 
 def get_possible_exams(cursor, connection):
     query = "select * from EXAM"
@@ -48,41 +46,35 @@ def get_possible_exams(cursor, connection):
             possible_exams.append([i[0], i[1], j[0]])
     return possible_exams
 
-
-def insert_into_has_exam(academic_year, exam_type, subject_id, cursor, connection):
+def insert_into_has_exam(academic_year, exam_type, subject_id,cursor,connection):
     query = "insert into HAS_EXAM(academic_year, exam_type, subject_id) values(%s, %s, %s)"
     cursor.execute(query, (academic_year, exam_type, subject_id))
     connection.commit()
 
-
-def insert_into_enrolled(academic_year, exam_type, subject_id, cursor, connection):
+def insert_into_enrolled(academic_year, exam_type, subject_id,cursor,connection):
     query = "insert into ENROLLED(academic_year, exam_type, subject_id) values(%s, %s, %s)"
     cursor.execute(query, (academic_year, exam_type, subject_id))
     connection.commit()
 
-
-def update_enrolled(subject_id, students_enrolled, exam_type, academic_year, cursor, connection):
+def update_enrolled(subject_id, students_enrolled, exam_type, academic_year,cursor,connection):
     query = "update ENROLLED set students_enrolled = %s where Subject_ID = %s and Exam_Type = %s and Academic_Year = %s"
     cursor.execute(query, (students_enrolled, subject_id, exam_type, academic_year))
     connection.commit()
 
-
-def insert_into_classroom(classroom_id, capacity, department_id, cursor, connection):
+def insert_into_classroom(classroom_id, capacity, department_id,cursor,connection):
     query = "insert into CLASSROOM values(%s, %s, %s)"
     cursor.execute(query, (classroom_id, capacity, department_id))
     connection.commit()
 
-
-def get_students_enrolled(subject_id, exam_type, academic_year, cursor, connection):
+def get_students_enrolled(subject_id, exam_type, academic_year,cursor,connection):
     query = "select Students_Enrolled from ENROLLED where Subject_ID = %s and Exam_Type = %s and Academic_Year = %s"
     cursor.execute(query, (subject_id, exam_type, academic_year))
     records = cursor.fetchall()
     students_enrolled = records[0][0]
     return students_enrolled
 
-
-def get_classrooms(cursor, connection):
-    query = "select Classroom_ID, Capacity, Department_ID from CLASSROOM"
+def get_classrooms(cursor,connection):
+    query = "select Classroom_ID, Capacity, Dept_ID from CLASSROOM"
     cursor.execute(query)
     records = cursor.fetchall()
     classrooms = []
@@ -90,15 +82,14 @@ def get_classrooms(cursor, connection):
         classrooms.append(row)
     return classrooms
 
-
-def assign_classrooms(subject_id, exam_type, academic_year, cursor, connection):
-    students_enrolled = get_students_enrolled(subject_id, exam_type, academic_year, cursor, connection)
-    available_classrooms = get_classrooms(cursor, connection)
+def assign_classrooms(subject_id, exam_type, academic_year,cursor,connection):
+    students_enrolled = get_students_enrolled(subject_id, exam_type, academic_year,cursor,connection)
+    available_classrooms = get_classrooms(cursor,connection)
     used_classrooms = []
     for i in available_classrooms:
-        x = random.randint(0, len(available_classrooms) - 1)
-        if (students_enrolled > 0 and available_classrooms[x] not in used_classrooms):
-            if (students_enrolled <= available_classrooms[x][1]):
+        x = random.randint(0, len(available_classrooms)-1)
+        if(students_enrolled>0 and available_classrooms[x] not in used_classrooms):
+            if(students_enrolled<=available_classrooms[x][1]):
                 used_classrooms.append(available_classrooms[x])
                 # print(available_classrooms[x][0]+', '+available_classrooms[x][2])
                 students_enrolled = 0
@@ -114,9 +105,8 @@ def assign_classrooms(subject_id, exam_type, academic_year, cursor, connection):
         query = "insert into assigned_classrooms values(%s, %s, %s, %s, %s)"
         cursor.execute(query, (i[0], subject_id, exam_type, academic_year, i[2]))
 
-
-def get_groups(cursor, connection):
-    query = "select Group_ID, Department_ID, Invig_count from FACULTY"
+def get_groups(cursor,connection):
+    query = "select Group_ID, Dept_ID, Invig_count from FACULTY"
     cursor.execute(query)
     records = cursor.fetchall()
     answer = []
@@ -126,17 +116,15 @@ def get_groups(cursor, connection):
     answer = list(answer)
     return answer
 
-
-def get_invig_count(faculty_id, department_id, cursor, connection):
-    query = "select Invig_count from FACULTY where Faculty_ID = %s and Department_ID = %s"
+def get_invig_count(faculty_id, department_id,cursor,connection):
+    query = "select Invig_count from FACULTY where Faculty_ID = %s and Dept_ID = %s"
     cursor.execute(query, (faculty_id, department_id))
     records = cursor.fetchall()
     invig_count = records[0][0]
     return invig_count
 
-
-def get_faculties_in_group(group_id, department_id, cursor, connection):
-    query = "select Faculty_ID from FACULTY where Group_ID = %s and Department_ID = %s"
+def get_faculties_in_group(group_id, department_id,cursor,connection):
+    query = "select Faculty_ID from FACULTY where Group_ID = %s and Dept_ID = %s"
     cursor.execute(query, (group_id, department_id))
     records = cursor.fetchall()
     faculties = []
@@ -144,15 +132,12 @@ def get_faculties_in_group(group_id, department_id, cursor, connection):
         faculties.append(row[0])
     return faculties
 
-
-def assign_faculty_classroom(faculty_id, academic_year, exam_type, classroom_id, department_id, subject_id, cursor,
-                             connection):
+def assign_faculty_classroom(faculty_id, academic_year, exam_type, classroom_id, department_id, subject_id,cursor,connection):
     query = "insert into invigilates values(%s, %s, %s, %s, %s, %s)"
     cursor.execute(query, (faculty_id, academic_year, exam_type, classroom_id, department_id, subject_id))
     connection.commit()
 
-
-def get_classrooms_assigned(cursor, connection):
+def get_classrooms_assigned(cursor,connection):
     query = "select * from assigned_classrooms"
     cursor.execute(query)
     records = cursor.fetchall()
@@ -161,23 +146,21 @@ def get_classrooms_assigned(cursor, connection):
         classrooms.append(row)
     return classrooms
 
-
-def increment_invig_count(faculty_id, department_id, cursor, connection):
-    query = "update FACULTY set Invig_count = Invig_count + 1 where Faculty_ID = %s and Department_ID = %s"
-    cursor.execute(query, (faculty_id, department_id))
+def increment_invig_count(faculty_id, department_id,cursor,connection):
+    query = "update FACULTY set Invig_count = Invig_count + 1 where Faculty_ID = %s and Dept_ID = %s"
+    cursor.execute(query, (faculty_id,department_id))
     connection.commit()
 
-
-def group_gets_assigned(classrooms, cursor, connection):
-    y = random.sample(range(0, len(classrooms)), len(classrooms) - 1)
-    while (len(y) != 0):
-        groups = get_groups(cursor, connection)
-        groups.sort(key=lambda x: x[2])
-        x = random.randint(0, 3)
-        faculties_group = get_faculties_in_group(groups[x][0], groups[x][1], cursor, connection)
+def group_gets_assigned(classrooms,cursor,connection):
+    y = random.sample(range(0,len(classrooms)), len(classrooms)-1)
+    while(len(y)!=0):
+        groups = get_groups(cursor,connection)
+        groups.sort(key = lambda x: x[2])
+        x = random.randint(0,3)
+        faculties_group = get_faculties_in_group(groups[x][0], groups[x][1],cursor,connection)
         for i in faculties_group:
             # print(i)
-            if len(y) == 0:
+            if len(y)==0:
                 break
             t = y.pop()
             # print(classrooms[t][3])
@@ -185,6 +168,10 @@ def group_gets_assigned(classrooms, cursor, connection):
             # print(classrooms[t][0])
             # print(classrooms[t][4])
             # print(groups[x][1])
-            assign_faculty_classroom(i, classrooms[t][3], classrooms[t][2], classrooms[t][0], classrooms[t][4],
-                                     classrooms[t][1], cursor, connection)
-            increment_invig_count(i, groups[x][1], cursor, connection)
+            assign_faculty_classroom(i, classrooms[t][3], classrooms[t][2], classrooms[t][0], classrooms[t][4], classrooms[t][1],cursor,connection)
+            increment_invig_count(i, groups[x][1],cursor,connection)
+
+def assign_students_enrolled_to_enrolled(cursor,connection):
+    query = "update enrolled set students_enrolled = (select count(*) from student where student.exam_type = enrolled.exam_type and student.subject_id = enrolled.subject_id);"
+    cursor.execute(query)
+    connection.commit()

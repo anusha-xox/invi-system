@@ -39,8 +39,8 @@ app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'any-secret-key-you-choose'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///invi-system.db'
-engine = create_engine('mysql+pymysql://root:root@123@localhost/SEE_INV_withflask')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@123@localhost/SEE_INV_withflask'
+engine = create_engine('mysql+pymysql://root:root@123@localhost/SEE_INV_withflask_tryingalgo')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@123@localhost/SEE_INV_withflask_tryingalgo'
 #
 
 # app.config['SQLALCHEMY_BINDS'] = {'faculty': 'sqlite:///faculty.db',
@@ -56,8 +56,8 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 with engine.connect() as con:
-    con.execute("CREATE DATABASE IF NOT EXISTS SEE_INV_withflask")
-    con.execute("USE SEE_INV_withflask")
+    con.execute("CREATE DATABASE IF NOT EXISTS SEE_INV_withflask_tryingalgo")
+    con.execute("USE SEE_INV_withflask_tryingalgo")
     con.execute("CREATE TABLE IF NOT EXISTS `user` (`id` int NOT NULL AUTO_INCREMENT,`email` varchar(100) DEFAULT NULL,`password` varchar(100) DEFAULT NULL,`username` varchar(1000) DEFAULT NULL,PRIMARY KEY (`id`),UNIQUE KEY `email` (`email`))")
     con.execute("CREATE TABLE IF NOT EXISTS `department` (`dept_id` varchar(250) NOT NULL,`dept_name` varchar(250) NOT NULL,`floors` int NOT NULL,PRIMARY KEY (`dept_id`),UNIQUE KEY `dept_name` (`dept_name`))")
     con.execute("CREATE TABLE IF NOT EXISTS `classroom` (   `classroom_id` varchar(250) NOT NULL,   `capacity` int NOT NULL,   `dept_id` varchar(250) NOT NULL,   PRIMARY KEY (`classroom_id`,`dept_id`),   KEY `dept_id` (`dept_id`),   CONSTRAINT `classroom_ibfk_1` FOREIGN KEY (`dept_id`) REFERENCES `department` (`dept_id`) )")
