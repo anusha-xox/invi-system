@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 import mysql.connector
 from mysql.connector import Error
 from sqlalchemy import create_engine
+import run as r
 # cursor,connection = None,None
 # try:
 #     connection = mysql.connector.connect(host="localhost",
@@ -275,10 +276,11 @@ def admin():
         "Generate Duty Report",
         "Give Invigilator Duty",
         "View Swap Requests",
-        "No of Faculties vs Department Plot"
+        "No of Faculties vs Department Plot",
+        "Invigilators vs Invigilation Count Plot"
     ]
     ADMIN_LINKS = [url_for('view_faculties'), url_for('view_faculty_dept'), url_for("view_invi_report"),
-                   url_for('admin_assign'), url_for("view_swap_requests"), url_for("plot")]
+                   url_for('admin_assign'), url_for("view_swap_requests"), url_for("plot"), url_for("algo-plot-admin")]
     return render_template(
         "grid.html",
         title="Admin",
@@ -498,3 +500,8 @@ def download():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+@app.route('/admin/algo-plot', methods=["GET", "POST"])
+def admin_algo_plot():
+    r.run_the_algo()
+    return render_template("algo-plot-admin.html", url='static/img/algo_plot.png')
