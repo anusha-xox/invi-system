@@ -53,9 +53,10 @@ class AdminForm(FlaskForm):
 
 
 class ClassroomForm(FlaskForm):
-    classroom_id = StringField('Capacity', validators=[DataRequired()])
+    classroom_id = StringField('Classroom ID', validators=[DataRequired()])
     capacity = StringField('Capacity', validators=[DataRequired()])
     dept_id = SelectField('Department ID', choices=DEPARTMENT_IDS, validators=[DataRequired()])
+    submit = SubmitField('Submit')
 
 
 class SubjectForm(FlaskForm):
