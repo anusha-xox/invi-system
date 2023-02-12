@@ -424,7 +424,7 @@ def view_faculty_dept():
 
 @app.route('/view-invi-report')
 def view_invi_report():
-    all_faculty = Faculty.query.all()
+    all_faculty = Invigilates.query.all()
     return render_template("view_invi_report.html", all_faculty=all_faculty, table_heading="All Faculty's Exam Duties")
 
 
