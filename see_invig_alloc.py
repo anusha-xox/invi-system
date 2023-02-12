@@ -2,7 +2,6 @@ import mysql.connector
 import math
 import random
 import matplotlib.pyplot as plt
-
 import mysql.connector
 from mysql.connector import Error
 

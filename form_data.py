@@ -13,7 +13,6 @@ DEPARTMENT_NAMES = ["Aerospace Engineering", "Biotechnology", "Chemical Engineer
                     "Master of Computer Applications", "Mechanical Engineering", "Telecommunication Engineering",
                     "Basic Sciences"]
 DEPARTMENT_IDS = ["AE", "BT", "CH", "CV", "CSE", "ECE", "EEE", "EIE", "IME", "ISE", "MA", "ME", "TC", "BS"]
-
 FACULTY_ROLE = ["Room Superintendent", "Deputy Room Superintendent", "Squad Team"]
 EXAM_TYPE = ["Regular", "Fasttrack", "Make Up"]
 EXAM_YEAR = ["2016", "2017", "2018", "2019", "2020", "2021", "2022"]
@@ -40,7 +39,7 @@ class FacultyForm(FlaskForm):
     m_name = StringField('Middle name')
     l_name = StringField('Last name')
     phone_no = StringField('Phone Number', validators=[DataRequired()])
-    dept_id = StringField('Department Id', validators=[DataRequired()])
+    dept_id = SelectField('Department ID', choices=DEPARTMENT_IDS, validators=[DataRequired()])
 
     # dept_name = SelectField('Department Name', choices=DEPARTMENT_NAMES, validators=[DataRequired()])
     submit = SubmitField('Submit')
@@ -49,8 +48,14 @@ class FacultyForm(FlaskForm):
 class AdminForm(FlaskForm):
     faculty_id = StringField('Faculty Id', validators=[DataRequired()])
     group_id = StringField('Group Id', validators=[DataRequired()])
-    dept_id = StringField('Dept Id', validators=[DataRequired()])
+    dept_id = SelectField('Department ID', choices=DEPARTMENT_IDS, validators=[DataRequired()])
     submit = SubmitField('Submit')
+
+
+class ClassroomForm(FlaskForm):
+    classroom_id = StringField('Capacity', validators=[DataRequired()])
+    capacity = StringField('Capacity', validators=[DataRequired()])
+    dept_id = SelectField('Department ID', choices=DEPARTMENT_IDS, validators=[DataRequired()])
 
 
 class SubjectForm(FlaskForm):

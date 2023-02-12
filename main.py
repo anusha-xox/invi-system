@@ -9,8 +9,7 @@ import pymysql
 import cryptography
 from flask_bootstrap import Bootstrap
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from form_data import LoginForm, RegisterForm, FacultyForm, AdminForm, SubjectForm, SwapRequestForm, DEPARTMENT_NAMES, \
-    DEPARTMENT_IDS
+from form_data import *
 ## for graph
 import io
 from flask import Response
@@ -61,17 +60,28 @@ login_manager.init_app(app)
 with engine.connect() as con:
     con.execute("CREATE DATABASE IF NOT EXISTS SEE_INV_withflask")
     con.execute("USE SEE_INV_withflask")
-    con.execute("CREATE TABLE IF NOT EXISTS `user` (`id` int NOT NULL AUTO_INCREMENT,`email` varchar(100) DEFAULT NULL,`password` varchar(100) DEFAULT NULL,`username` varchar(1000) DEFAULT NULL,PRIMARY KEY (`id`),UNIQUE KEY `email` (`email`))")
-    con.execute("CREATE TABLE IF NOT EXISTS `department` (`dept_id` varchar(250) NOT NULL,`dept_name` varchar(250) NOT NULL,`floors` int NOT NULL,PRIMARY KEY (`dept_id`),UNIQUE KEY `dept_name` (`dept_name`))")
-    con.execute("CREATE TABLE IF NOT EXISTS `classroom` (   `classroom_id` varchar(250) NOT NULL,   `capacity` int NOT NULL,   `dept_id` varchar(250) NOT NULL,   PRIMARY KEY (`classroom_id`,`dept_id`),   KEY `dept_id` (`dept_id`),   CONSTRAINT `classroom_ibfk_1` FOREIGN KEY (`dept_id`) REFERENCES `department` (`dept_id`) )")
-    con.execute("CREATE TABLE IF NOT EXISTS `faculty` (   `faculty_id` varchar(10) NOT NULL,   `f_name` varchar(250) NOT NULL,   `m_name` varchar(250) NOT NULL,   `l_name` varchar(250) NOT NULL,   `email` varchar(250) NOT NULL,   `phone_no` varchar(10) NOT NULL,   `group_id` varchar(250) NOT NULL,   `invig_count` int NOT NULL,   `special_count` int NOT NULL,   `dept_id` varchar(250) NOT NULL,   PRIMARY KEY (`faculty_id`,`dept_id`),   UNIQUE KEY `email` (`email`),   UNIQUE KEY `phone_no` (`phone_no`),   KEY `dept_id` (`dept_id`),   CONSTRAINT `faculty_ibfk_1` FOREIGN KEY (`dept_id`) REFERENCES `department` (`dept_id`) )")
-    con.execute("CREATE TABLE IF NOT EXISTS `SUBJECT` (   `subject_id` varchar(250) NOT NULL,   `subject_name` varchar(250) NOT NULL,   `subject_duration` varchar(15) NOT NULL,   PRIMARY KEY (`subject_id`) )")
-    con.execute("CREATE TABLE IF NOT EXISTS `EXAM` (   `academic_year` varchar(4) NOT NULL,   `exam_type` varchar(15) NOT NULL,   PRIMARY KEY (`academic_year`,`exam_type`) )")
-    con.execute("CREATE TABLE IF NOT EXISTS `enrolled` (   `Academic_Year` varchar(4) NOT NULL,   `Exam_Type` varchar(20) NOT NULL,   `Subject_ID` varchar(10) NOT NULL,   `students_enrolled` int DEFAULT NULL,   PRIMARY KEY (`Academic_Year`,`Exam_Type`,`Subject_ID`),   KEY `Subject_ID` (`Subject_ID`),   CONSTRAINT `enrolled_ibfk_1` FOREIGN KEY (`Academic_Year`, `Exam_Type`) REFERENCES `exam` (`academic_year`, `exam_type`) ON DELETE CASCADE,   CONSTRAINT `enrolled_ibfk_2` FOREIGN KEY (`Subject_ID`) REFERENCES `subject` (`subject_id`) )")
-    con.execute("CREATE TABLE IF NOT EXISTS `invigilates` (   `faculty_id` varchar(10) NOT NULL,   `academic_year` varchar(4) NOT NULL,   `exam_type` varchar(15) NOT NULL,   `classroom_id` varchar(10) NOT NULL,   `department_id` varchar(10) NOT NULL,   `subject_id` varchar(10) NOT NULL,   PRIMARY KEY (`faculty_id`,`academic_year`,`exam_type`,`classroom_id`,`department_id`,`subject_id`),   KEY `academic_year` (`academic_year`,`exam_type`),   KEY `classroom_id` (`classroom_id`),   KEY `department_id` (`department_id`),   KEY `subject_id` (`subject_id`),   CONSTRAINT `invigilates_ibfk_1` FOREIGN KEY (`faculty_id`) REFERENCES `faculty` (`faculty_id`),   CONSTRAINT `invigilates_ibfk_2` FOREIGN KEY (`academic_year`, `exam_type`) REFERENCES `exam` (`academic_year`, `exam_type`),   CONSTRAINT `invigilates_ibfk_3` FOREIGN KEY(`classroom_id`) REFERENCES `classroom` (`classroom_id`),   CONSTRAINT `invigilates_ibfk_4` FOREIGN KEY (`department_id`) REFERENCES `department` (`dept_id`),   CONSTRAINT `invigilates_ibfk_5` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`) )")
-    con.execute("CREATE TABLE IF NOT EXISTS `student` (   `student_id` varchar(12) NOT NULL,   `st_f_name` varchar(50) DEFAULT NULL,   `st_l_name` varchar(50) DEFAULT NULL,   `academic_year` varchar(4) NOT NULL,   `exam_type` varchar(15) NOT NULL,   `subject_id` varchar(10) NOT NULL,   PRIMARY KEY (`student_id`,`academic_year`,`exam_type`,`subject_id`),   KEY `academic_year` (`academic_year`,`exam_type`),   KEY `subject_id` (`subject_id`),   CONSTRAINT `student_ibfk_1` FOREIGN KEY (`academic_year`, `exam_type`) REFERENCES `exam` (`academic_year`, `exam_type`),   CONSTRAINT `student_ibfk_2` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`) )")
-    con.execute("CREATE TABLE IF NOT EXISTS `has_exam` (   `academic_year` varchar(4) NOT NULL,   `exam_type` varchar(15) NOT NULL,   `subject_id` varchar(10) NOT NULL,   `required_invigilators` int DEFAULT NULL,   `exam_date` date DEFAULT NULL,   PRIMARY KEY (`academic_year`,`exam_type`,`subject_id`),   KEY `subject_id` (`subject_id`),   CONSTRAINT `has_exam_ibfk_1` FOREIGN KEY (`academic_year`, `exam_type`) REFERENCES `exam` (`academic_year`, `exam_type`),   CONSTRAINT `has_exam_ibfk_2` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`) )")
-    con.execute("CREATE TABLE IF NOT EXISTS `assigned_classrooms` (   `classroom_id` varchar(10) NOT NULL,   `subject_id` varchar(10) NOT NULL,   `exam_type` varchar(15) NOT NULL,   `academic_year` varchar(4) NOT NULL,   `department_id` varchar(10) NOT NULL,   PRIMARY KEY (`classroom_id`,`subject_id`,`exam_type`,`academic_year`,`department_id`),   KEY `subject_id` (`subject_id`),   KEY `academic_year` (`academic_year`,`exam_type`),   KEY `department_id` (`department_id`),   CONSTRAINT `assigned_classrooms_ibfk_1` FOREIGN KEY (`classroom_id`) REFERENCES `classroom` (`classroom_id`),   CONSTRAINT `assigned_classrooms_ibfk_2`FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`),   CONSTRAINT `assigned_classrooms_ibfk_3` FOREIGN KEY (`academic_year`, `exam_type`) REFERENCES `exam` (`academic_year`, `exam_type`),   CONSTRAINT `assigned_classrooms_ibfk_4` FOREIGN KEY (`department_id`) REFERENCES `department` (`dept_id`) )")
+    con.execute(
+        "CREATE TABLE IF NOT EXISTS `user` (`id` int NOT NULL AUTO_INCREMENT,`email` varchar(100) DEFAULT NULL,`password` varchar(100) DEFAULT NULL,`username` varchar(1000) DEFAULT NULL,PRIMARY KEY (`id`),UNIQUE KEY `email` (`email`))")
+    con.execute(
+        "CREATE TABLE IF NOT EXISTS `department` (`dept_id` varchar(250) NOT NULL,`dept_name` varchar(250) NOT NULL,`floors` int NOT NULL,PRIMARY KEY (`dept_id`),UNIQUE KEY `dept_name` (`dept_name`))")
+    con.execute(
+        "CREATE TABLE IF NOT EXISTS `classroom` (   `classroom_id` varchar(250) NOT NULL,   `capacity` int NOT NULL,   `dept_id` varchar(250) NOT NULL,   PRIMARY KEY (`classroom_id`,`dept_id`),   KEY `dept_id` (`dept_id`),   CONSTRAINT `classroom_ibfk_1` FOREIGN KEY (`dept_id`) REFERENCES `department` (`dept_id`) )")
+    con.execute(
+        "CREATE TABLE IF NOT EXISTS `faculty` (   `faculty_id` varchar(10) NOT NULL,   `f_name` varchar(250) NOT NULL,   `m_name` varchar(250) NOT NULL,   `l_name` varchar(250) NOT NULL,   `email` varchar(250) NOT NULL,   `phone_no` varchar(10) NOT NULL,   `group_id` varchar(250) NOT NULL,   `invig_count` int NOT NULL,   `special_count` int NOT NULL,   `dept_id` varchar(250) NOT NULL,   PRIMARY KEY (`faculty_id`,`dept_id`),   UNIQUE KEY `email` (`email`),   UNIQUE KEY `phone_no` (`phone_no`),   KEY `dept_id` (`dept_id`),   CONSTRAINT `faculty_ibfk_1` FOREIGN KEY (`dept_id`) REFERENCES `department` (`dept_id`) )")
+    con.execute(
+        "CREATE TABLE IF NOT EXISTS `SUBJECT` (   `subject_id` varchar(250) NOT NULL,   `subject_name` varchar(250) NOT NULL,   `subject_duration` varchar(15) NOT NULL,   PRIMARY KEY (`subject_id`) )")
+    con.execute(
+        "CREATE TABLE IF NOT EXISTS `EXAM` (   `academic_year` varchar(4) NOT NULL,   `exam_type` varchar(15) NOT NULL,   PRIMARY KEY (`academic_year`,`exam_type`) )")
+    con.execute(
+        "CREATE TABLE IF NOT EXISTS `enrolled` (   `Academic_Year` varchar(4) NOT NULL,   `Exam_Type` varchar(20) NOT NULL,   `Subject_ID` varchar(10) NOT NULL,   `students_enrolled` int DEFAULT NULL,   PRIMARY KEY (`Academic_Year`,`Exam_Type`,`Subject_ID`),   KEY `Subject_ID` (`Subject_ID`),   CONSTRAINT `enrolled_ibfk_1` FOREIGN KEY (`Academic_Year`, `Exam_Type`) REFERENCES `exam` (`academic_year`, `exam_type`) ON DELETE CASCADE,   CONSTRAINT `enrolled_ibfk_2` FOREIGN KEY (`Subject_ID`) REFERENCES `subject` (`subject_id`) )")
+    con.execute(
+        "CREATE TABLE IF NOT EXISTS `invigilates` (   `faculty_id` varchar(10) NOT NULL,   `academic_year` varchar(4) NOT NULL,   `exam_type` varchar(15) NOT NULL,   `classroom_id` varchar(10) NOT NULL,   `department_id` varchar(10) NOT NULL,   `subject_id` varchar(10) NOT NULL,   PRIMARY KEY (`faculty_id`,`academic_year`,`exam_type`,`classroom_id`,`department_id`,`subject_id`),   KEY `academic_year` (`academic_year`,`exam_type`),   KEY `classroom_id` (`classroom_id`),   KEY `department_id` (`department_id`),   KEY `subject_id` (`subject_id`),   CONSTRAINT `invigilates_ibfk_1` FOREIGN KEY (`faculty_id`) REFERENCES `faculty` (`faculty_id`),   CONSTRAINT `invigilates_ibfk_2` FOREIGN KEY (`academic_year`, `exam_type`) REFERENCES `exam` (`academic_year`, `exam_type`),   CONSTRAINT `invigilates_ibfk_3` FOREIGN KEY(`classroom_id`) REFERENCES `classroom` (`classroom_id`),   CONSTRAINT `invigilates_ibfk_4` FOREIGN KEY (`department_id`) REFERENCES `department` (`dept_id`),   CONSTRAINT `invigilates_ibfk_5` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`) )")
+    con.execute(
+        "CREATE TABLE IF NOT EXISTS `student` (   `student_id` varchar(12) NOT NULL,   `st_f_name` varchar(50) DEFAULT NULL,   `st_l_name` varchar(50) DEFAULT NULL,   `academic_year` varchar(4) NOT NULL,   `exam_type` varchar(15) NOT NULL,   `subject_id` varchar(10) NOT NULL,   PRIMARY KEY (`student_id`,`academic_year`,`exam_type`,`subject_id`),   KEY `academic_year` (`academic_year`,`exam_type`),   KEY `subject_id` (`subject_id`),   CONSTRAINT `student_ibfk_1` FOREIGN KEY (`academic_year`, `exam_type`) REFERENCES `exam` (`academic_year`, `exam_type`),   CONSTRAINT `student_ibfk_2` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`) )")
+    con.execute(
+        "CREATE TABLE IF NOT EXISTS `has_exam` (   `academic_year` varchar(4) NOT NULL,   `exam_type` varchar(15) NOT NULL,   `subject_id` varchar(10) NOT NULL,   `required_invigilators` int DEFAULT NULL,   `exam_date` date DEFAULT NULL,   PRIMARY KEY (`academic_year`,`exam_type`,`subject_id`),   KEY `subject_id` (`subject_id`),   CONSTRAINT `has_exam_ibfk_1` FOREIGN KEY (`academic_year`, `exam_type`) REFERENCES `exam` (`academic_year`, `exam_type`),   CONSTRAINT `has_exam_ibfk_2` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`) )")
+    con.execute(
+        "CREATE TABLE IF NOT EXISTS `assigned_classrooms` (   `classroom_id` varchar(10) NOT NULL,   `subject_id` varchar(10) NOT NULL,   `exam_type` varchar(15) NOT NULL,   `academic_year` varchar(4) NOT NULL,   `department_id` varchar(10) NOT NULL,   PRIMARY KEY (`classroom_id`,`subject_id`,`exam_type`,`academic_year`,`department_id`),   KEY `subject_id` (`subject_id`),   KEY `academic_year` (`academic_year`,`exam_type`),   KEY `department_id` (`department_id`),   CONSTRAINT `assigned_classrooms_ibfk_1` FOREIGN KEY (`classroom_id`) REFERENCES `classroom` (`classroom_id`),   CONSTRAINT `assigned_classrooms_ibfk_2`FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`),   CONSTRAINT `assigned_classrooms_ibfk_3` FOREIGN KEY (`academic_year`, `exam_type`) REFERENCES `exam` (`academic_year`, `exam_type`),   CONSTRAINT `assigned_classrooms_ibfk_4` FOREIGN KEY (`department_id`) REFERENCES `department` (`dept_id`) )")
 
 
 class User(UserMixin, db.Model):
@@ -295,13 +305,22 @@ def admin():
         "Generate Invigilator Report",
         "Generate Department Report",
         "Generate Duty Report",
-        "Give Invigilator Duty",
+        "Give Invigilator Group",
         "View Swap Requests",
         "No of Faculties vs Department Plot",
         "Invigilators vs Invigilation Count Plot",
+        "Assign Classroom"
     ]
-    ADMIN_LINKS = [url_for('view_faculties'), url_for('view_faculty_dept'), url_for("view_invi_report"),
-                   url_for('admin_assign'), url_for("view_swap_requests"), url_for("plot"), url_for("admin_algo_plot")]
+    ADMIN_LINKS = [
+        url_for('view_faculties'),
+        url_for('view_faculty_dept'),
+        url_for("view_invi_report"),
+        url_for('admin_assign_group'),
+        url_for("view_swap_requests"),
+        url_for("plot"),
+        url_for("admin_algo_plot"),
+        url_for('admin_assign_classroom')
+    ]
     return render_template(
         "grid.html",
         title="Admin",
@@ -406,8 +425,8 @@ def swap_request():
         return render_template("add_details.html", form=form, display_name=current_faculty.f_name)
 
 
-@app.route('/admin-assign', methods=['GET', 'POST'])
-def admin_assign():
+@app.route('/admin/assign-group', methods=['GET', 'POST'])
+def admin_assign_group():
     form = AdminForm()
     if form.validate_on_submit():
         faculty_id = form.faculty_id.data
@@ -416,22 +435,44 @@ def admin_assign():
         faculty_to_edit = Faculty.query.filter_by(faculty_id=faculty_id).first()
         if faculty_to_edit:
             faculty_to_edit.group_id = group_id
-            # new_allotment = Faculty(
-            #     fac_id=fac_id,
-            #     group_id=group_id,
-            #     dept_id=dept_id,
-            #     faculty_role=form.faculty_role.data,
-            #     date=form.date.data,
-            #     timeslot=form.timeslot.data,
-            #     exam_type=form.exam_type.data,
-            #     exam_year=form.exam_year.data,
-            #     subject_code=form.subject_code.data
-            # )
             with engine.connect() as con:
                 con.execute("UPDATE faculty SET group_id = %s WHERE faculty_id = %s AND dept_id = %s", group_id,
                             faculty_id, dept_id)
             return redirect(url_for('admin'))
     return render_template("add_details.html", form=form, display_name="Admin! Add/Update Faculty details below.")
+
+
+@app.route('/admin/assign-classroom', methods=['GET', 'POST'])
+def admin_assign_classroom():
+    form = ClassroomForm()
+    if form.validate_on_submit():
+        new_classroom = Classroom(
+            classroom_id=form.classroom_id.data,
+            capacity=form.capacity.data,
+            dept_id=form.dept_id.data
+        )
+        db.session.add(new_classroom)
+        db.session.commit()
+        return redirect(url_for('admin'))
+    return render_template("add_details.html", form=form, display_name="Admin! Add Classroom details below.")
+
+
+@app.route('/admin/edit-classroom', methods=['GET', 'POST'])
+def admin_edit_classroom():
+    form = ClassroomForm(
+        classroom_id=request.args.get("classroom_id")
+    )
+    if form.validate_on_submit():
+        classroom_id = form.classroom_id.data
+        capacity = form.capacity.data
+        dept_id = form.dept_id.data
+        classroom_to_edit = Classroom.query.filter_by(classroom_id=classroom_id).first()
+        if classroom_to_edit:
+            classroom_id.capacity = capacity
+            classroom_id.dept_id = dept_id
+            db.session.commit()
+            return redirect(url_for('admin'))
+    return render_template("add_details.html", form=form, display_name="Admin! Update Classroom details below.")
 
 
 @app.route('/admin/view-faculties')
