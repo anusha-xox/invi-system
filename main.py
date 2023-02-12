@@ -309,7 +309,8 @@ def admin():
         "View Swap Requests",
         "No of Faculties vs Department Plot",
         "Invigilators vs Invigilation Count Plot",
-        "Assign Classroom"
+        "Assign Classroom",
+        "Add Exam Type"
     ]
     ADMIN_LINKS = [
         url_for('view_faculties'),
@@ -319,7 +320,8 @@ def admin():
         url_for("view_swap_requests"),
         url_for("plot"),
         url_for("admin_algo_plot"),
-        url_for('admin_assign_classroom')
+        url_for('admin_assign_classroom'),
+        url_for('admin_add_exam')
     ]
     return render_template(
         "grid.html",
@@ -457,6 +459,20 @@ def admin_assign_classroom():
     return render_template("add_details.html", form=form, display_name="Admin! Add Classroom details below.")
 
 
+@app.route('/admin/add-exam-type', methods=['GET', 'POST'])
+def admin_add_exam():
+    form = ExamTypeForm()
+    if form.validate_on_submit():
+        new_exam_type = Exam(
+            academic_year=form.academic_year.data,
+            exam_type=form.exam_type.data
+        )
+        db.session.add(new_exam_type)
+        db.session.commit()
+        return redirect(url_for('admin'))
+    return render_template("add_details.html", form=form, display_name="Admin! Add Exam type below.")
+
+
 @app.route('/admin/edit-classroom', methods=['GET', 'POST'])
 def admin_edit_classroom():
     form = ClassroomForm(
@@ -569,3 +585,5 @@ def admin_algo_plot():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+### Table with list of classrooms and edit feature

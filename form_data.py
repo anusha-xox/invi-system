@@ -59,6 +59,12 @@ class ClassroomForm(FlaskForm):
     submit = SubmitField('Submit')
 
 
+class ExamTypeForm(FlaskForm):
+    academic_year = SelectField('Academic Year', choices=EXAM_YEAR, validators=[DataRequired()])
+    exam_type = SelectField('Exam Type', choices=EXAM_TYPE, validators=[DataRequired()])
+    submit = SubmitField('Submit')
+
+
 class SubjectForm(FlaskForm):
     sub_id = StringField('Subject Id', validators=[DataRequired()])
     sub_name = StringField('Subject Name', validators=[DataRequired()])
