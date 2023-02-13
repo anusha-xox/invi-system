@@ -301,6 +301,16 @@ def add_faculty():
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
+    a = Assigned_classrooms.query.all()
+    c = Classroom.query.all()
+    d = Department.query.all()
+    e = Enrolled.query.all()
+    ex = Exam.query.all()
+    f = Faculty.query.all()
+    he = Has_exam.query.all()
+    i = Invigilates.query.all()
+    s = Student.query.all()
+    su = Subject.query.all()
     ADMIN_OPTIONS = [
         "Generate Invigilator Report",
         "Generate Department Report",
@@ -311,7 +321,7 @@ def admin():
         "Invigilators vs Invigilation Count Plot",
         "Assign Classroom",
         "Add Exam Type",
-        "Add Date to Exam"
+        "Add Date to Exam",
     ]
     ADMIN_LINKS = [
         url_for('view_faculties'),
@@ -325,6 +335,10 @@ def admin():
         url_for('admin_add_exam'),
         url_for('admin_add_exam_date')
     ]
+    if not (len(a) == 0 or len(c) == 0 or len(d) == 0 or len(e) == 0 or len(ex) == 0 or len(f) == 0 or len(
+            he) == 0 or len(i) == 0 or len(s) == 0 or len(su) == 0):
+        ADMIN_OPTIONS.append("Allocate Invigilator")
+        ADMIN_LINKS.append(url_for('allocate_invigilator'))
     return render_template(
         "grid.html",
         title="Admin",
@@ -514,6 +528,9 @@ def admin_edit_classroom():
             return redirect(url_for('admin'))
     return render_template("add_details.html", form=form, display_name="Admin! Update Classroom details below.")
 
+@app.route('/admin/allocate-invigilator', methods = ["GET", "POST"])
+def allocate_invigilator():
+    pass
 
 @app.route('/admin/view-faculties')
 def view_faculties():

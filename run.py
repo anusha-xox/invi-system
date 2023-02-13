@@ -2,6 +2,8 @@ import see_invig_alloc as s
 import matplotlib.pyplot as plt
 import mysql.connector
 from mysql.connector import Error
+
+
 def run_the_algo():
     try:
         connection = mysql.connector.connect(host="localhost",
@@ -33,13 +35,12 @@ def run_the_algo():
     cursor.execute(query)
     connection.commit()
 
-
     possible_exams = s.get_possible_exams(cursor, connection)
     for i in possible_exams:
         s.insert_into_has_exam(i[0], i[1], i[2], cursor, connection)
         s.insert_into_enrolled(i[0], i[1], i[2], cursor, connection)
 
-    s.assign_students_enrolled_to_enrolled(cursor,connection)
+    s.assign_students_enrolled_to_enrolled(cursor, connection)
     for i in possible_exams:
         s.assign_classrooms(i[2], i[1], i[0], cursor, connection)
 
@@ -63,6 +64,5 @@ def run_the_algo():
     plt.title('Faculty vs Invigilator Count')
     plt.savefig('static/img/algo_plot.png')
 
+
 run_the_algo()
-
-
