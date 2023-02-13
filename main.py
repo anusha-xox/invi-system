@@ -20,6 +20,9 @@ import mysql.connector
 from mysql.connector import Error
 from sqlalchemy import create_engine
 import run as r
+## for idcard
+from pyzbar import pyzbar
+import cv2
 
 # cursor,connection = None,None
 # try:
@@ -82,6 +85,44 @@ with engine.connect() as con:
         "CREATE TABLE IF NOT EXISTS `has_exam` (   `academic_year` varchar(4) NOT NULL,   `exam_type` varchar(15) NOT NULL,   `subject_id` varchar(10) NOT NULL,   `required_invigilators` int DEFAULT NULL,   `exam_date` date DEFAULT NULL,   PRIMARY KEY (`academic_year`,`exam_type`,`subject_id`),   KEY `subject_id` (`subject_id`),   CONSTRAINT `has_exam_ibfk_1` FOREIGN KEY (`academic_year`, `exam_type`) REFERENCES `exam` (`academic_year`, `exam_type`),   CONSTRAINT `has_exam_ibfk_2` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`) )")
     con.execute(
         "CREATE TABLE IF NOT EXISTS `assigned_classrooms` (   `classroom_id` varchar(10) NOT NULL,   `subject_id` varchar(10) NOT NULL,   `exam_type` varchar(15) NOT NULL,   `academic_year` varchar(4) NOT NULL,   `department_id` varchar(10) NOT NULL,   PRIMARY KEY (`classroom_id`,`subject_id`,`exam_type`,`academic_year`,`department_id`),   KEY `subject_id` (`subject_id`),   KEY `academic_year` (`academic_year`,`exam_type`),   KEY `department_id` (`department_id`),   CONSTRAINT `assigned_classrooms_ibfk_1` FOREIGN KEY (`classroom_id`) REFERENCES `classroom` (`classroom_id`),   CONSTRAINT `assigned_classrooms_ibfk_2`FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`),   CONSTRAINT `assigned_classrooms_ibfk_3` FOREIGN KEY (`academic_year`, `exam_type`) REFERENCES `exam` (`academic_year`, `exam_type`),   CONSTRAINT `assigned_classrooms_ibfk_4` FOREIGN KEY (`department_id`) REFERENCES `department` (`dept_id`) )")
+
+
+def draw_barcode(decoded, image):
+    image = cv2.rectangle(image, (decoded.rect.left, decoded.rect.top),
+                          (decoded.rect.left + decoded.rect.width, decoded.rect.top + decoded.rect.height),
+                          color=(0, 255, 0),
+                          thickness=5)
+    return image
+
+
+def gen():
+    camera = cv2.VideoCapture(0)
+
+    while True:
+        success, frame = camera.read()
+        if not success:
+            break
+        else:
+            decoded_objects = pyzbar.decode(frame)
+            for obj in decoded_objects:
+                # draw the barcode
+                print("detected barcode:", obj)
+                image = draw_barcode(obj, frame)
+                global data_barcode
+                global type_barcode
+                type_barcode = obj.type
+                data_barcode = obj.data
+                str1 = obj.data.decode('UTF-8')
+                data_barcode = str1
+                # print barcode type & data
+                print("Type:", obj.type)
+                print("Data:", obj.data)
+                print()
+
+            ret, buffer = cv2.imencode(".jpg", frame)
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
 class User(UserMixin, db.Model):
@@ -539,14 +580,16 @@ def allocate_invigilator():
     for i in all_duties:
         for j in all_has_exam:
             if i.academic_year == j.academic_year and i.exam_type == j.exam_type and i.subject_id == j.subject_id:
-                current_entry = Has_exam.query.filter_by(academic_year=i.academic_year).filter_by(exam_type=i.exam_type).filter_by(subject_id=i.subject_id).first()
+                current_entry = Has_exam.query.filter_by(academic_year=i.academic_year).filter_by(
+                    exam_type=i.exam_type).filter_by(subject_id=i.subject_id).first()
                 dates.append(current_entry.exam_date)
             else:
                 dates.append("No date assigned yet.")
     no_invi = False
     if len(all_duties) == 0:
         no_invi = True
-    return render_template("view-invi-duty.html", all_duties=all_duties, dates=dates, no_invi=no_invi, len_all_duties = len(all_duties))
+    return render_template("view-invi-duty.html", all_duties=all_duties, dates=dates, no_invi=no_invi,
+                           len_all_duties=len(all_duties))
 
 
 @app.route('/admin/view-faculties')
@@ -638,6 +681,31 @@ def download():
 def admin_algo_plot():
     r.run_the_algo()
     return render_template("algo-plot-admin.html", url='static/img/algo_plot.png')
+
+
+@app.route('/barcode_reader')
+def barcode_reader():
+    display_name = request.args.get("display_name")
+    default_email = request.args.get("default_email")
+    return render_template('barcode.html', display_name=display_name, default_email=default_email)
+
+
+@app.route('/display_barcode')
+def display_barcode():
+    display_name = request.args.get("display_name")
+    default_email = request.args.get("default_email")
+    return render_template(
+        'display_barcode.html',
+        type1=type_barcode,
+        data1=data_barcode,
+        display_name=display_name,
+        default_email=default_email
+    )
+
+
+@app.route('/video_feed')
+def video_feed():
+    return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 if __name__ == "__main__":
