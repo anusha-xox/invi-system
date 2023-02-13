@@ -310,7 +310,8 @@ def admin():
         "No of Faculties vs Department Plot",
         "Invigilators vs Invigilation Count Plot",
         "Assign Classroom",
-        "Add Exam Type"
+        "Add Exam Type",
+        "Add Date to Exam"
     ]
     ADMIN_LINKS = [
         url_for('view_faculties'),
@@ -321,7 +322,8 @@ def admin():
         url_for("plot"),
         url_for("admin_algo_plot"),
         url_for('admin_assign_classroom'),
-        url_for('admin_add_exam')
+        url_for('admin_add_exam'),
+        url_for('admin_add_exam_date')
     ]
     return render_template(
         "grid.html",
@@ -471,6 +473,28 @@ def admin_add_exam():
         db.session.commit()
         return redirect(url_for('admin'))
     return render_template("add_details.html", form=form, display_name="Admin! Add Exam type below.")
+
+
+@app.route('/admin/add-exam-date', methods=['GET', 'POST'])
+def admin_add_exam_date():
+    form = ExamDate()
+    if form.validate_on_submit():
+        existing_exam_date = Has_exam.query.filter_by(academic_year=form.academic_year.data).filter_by(exam_type=form.exam_type.data).filter_by(subject_id=form.subject_id.data).first()
+        if existing_exam_date:
+            existing_exam_date.required_invigilators = form.required_invigilators.data
+            existing_exam_date.exam_date = form.exam_date.data
+        else:
+            new_exam_date = Has_exam(
+                academic_year=form.academic_year.data,
+                exam_type=form.exam_type.data,
+                subject_id=form.subject_id.data,
+                required_invigilators=form.required_invigilators.data,
+                exam_date=form.exam_date.data
+            )
+            db.session.add(new_exam_date)
+        db.session.commit()
+        return redirect(url_for('admin'))
+    return render_template("add_details.html", form=form, display_name="Admin! Add Exam Date below.")
 
 
 @app.route('/admin/edit-classroom', methods=['GET', 'POST'])

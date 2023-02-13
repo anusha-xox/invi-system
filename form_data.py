@@ -5,6 +5,8 @@ from flask_bootstrap import Bootstrap
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 import email_validator
+from wtforms.fields.html5 import DateField, IntegerField
+from main import Exam, Subject
 
 DEPARTMENT_NAMES = ["Aerospace Engineering", "Biotechnology", "Chemical Engineering", "Civil Engineering",
                     "Computer Science and Engineering", "Electrical and Electronics Engineering",
@@ -15,7 +17,7 @@ DEPARTMENT_NAMES = ["Aerospace Engineering", "Biotechnology", "Chemical Engineer
 DEPARTMENT_IDS = ["AE", "BT", "CH", "CV", "CSE", "ECE", "EEE", "EIE", "IME", "ISE", "MA", "ME", "TC", "BS"]
 FACULTY_ROLE = ["Room Superintendent", "Deputy Room Superintendent", "Squad Team"]
 EXAM_TYPE = ["Regular", "Fasttrack", "Make Up"]
-EXAM_YEAR = ["2016", "2017", "2018", "2019", "2020", "2021", "2022"]
+EXAM_YEAR = ["2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023"]
 SUBJECT_CODES = ["18MA11", "18PH12", "18EE13", "18CV14", "18EE15", "18ME16", "18HS17"]
 
 
@@ -63,6 +65,24 @@ class ExamTypeForm(FlaskForm):
     academic_year = SelectField('Academic Year', choices=EXAM_YEAR, validators=[DataRequired()])
     exam_type = SelectField('Exam Type', choices=EXAM_TYPE, validators=[DataRequired()])
     submit = SubmitField('Submit')
+
+
+class ExamDate(FlaskForm):
+    academic_year = SelectField("Academic Year")
+    exam_type = SelectField('Exam Type', choices=EXAM_TYPE, validators=[DataRequired()])
+    subject_id = SelectField("Subject ID", validators=[DataRequired()])
+    required_invigilators = IntegerField('Required Invigilators', validators=[DataRequired()])
+    exam_date = DateField('Exam Date', format='%Y-%m-%d')
+
+    def validate_date(form, field):
+        pass
+
+    def __init__(self, *args, **kwargs):
+        super(ExamDate, self).__init__(*args, **kwargs)
+        self.academic_year.choices = [c.academic_year for c in Exam.query.all()]
+        self.subject_id.choices = [c.subject_id for c in Subject.query.all()]
+
+    submit = SubmitField(label='Submit')
 
 
 class SubjectForm(FlaskForm):
