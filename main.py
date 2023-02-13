@@ -493,7 +493,8 @@ def admin_add_exam():
 def admin_add_exam_date():
     form = ExamDate()
     if form.validate_on_submit():
-        existing_exam_date = Has_exam.query.filter_by(academic_year=form.academic_year.data).filter_by(exam_type=form.exam_type.data).filter_by(subject_id=form.subject_id.data).first()
+        existing_exam_date = Has_exam.query.filter_by(academic_year=form.academic_year.data).filter_by(
+            exam_type=form.exam_type.data).filter_by(subject_id=form.subject_id.data).first()
         if existing_exam_date:
             existing_exam_date.required_invigilators = form.required_invigilators.data
             existing_exam_date.exam_date = form.exam_date.data
@@ -528,9 +529,25 @@ def admin_edit_classroom():
             return redirect(url_for('admin'))
     return render_template("add_details.html", form=form, display_name="Admin! Update Classroom details below.")
 
-@app.route('/admin/allocate-invigilator', methods = ["GET", "POST"])
+
+@app.route('/admin/allocate-invigilator', methods=["GET", "POST"])
 def allocate_invigilator():
-    pass
+    r.run_the_algo()
+    all_duties = Invigilates.query.all()
+    all_has_exam = Has_exam.query.all()
+    dates = []
+    for i in all_duties:
+        for j in all_has_exam:
+            if i.academic_year == j.academic_year and i.exam_type == j.exam_type and i.subject_id == j.subject_id:
+                current_entry = Has_exam.query.filter_by(academic_year=i.academic_year).filter_by(exam_type=i.exam_type).filter_by(subject_id=i.subject_id).first()
+                dates.append(current_entry.exam_date)
+            else:
+                dates.append("No date assigned yet.")
+    no_invi = False
+    if len(all_duties) == 0:
+        no_invi = True
+    return render_template("view-invi-duty.html", all_duties=all_duties, dates=dates, no_invi=no_invi, len_all_duties = len(all_duties))
+
 
 @app.route('/admin/view-faculties')
 def view_faculties():
@@ -602,7 +619,6 @@ def logout():
 
 
 @app.route('/secrets')
-# @login_required
 def secrets():
     display_name = request.args.get("display_name")
     return render_template("secrets.html", display_name=display_name)

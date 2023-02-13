@@ -35,7 +35,7 @@ class RegisterForm(FlaskForm):
 
 
 class FacultyForm(FlaskForm):
-    faculty_id = StringField('Faculty Id', validators=[DataRequired()], render_kw={'readonly': True})
+    faculty_id = StringField('Faculty Id', validators=[DataRequired()])
     email = StringField('Faculty Email', validators=[DataRequired(), Email()], render_kw={'readonly': True})
     f_name = StringField('First name', validators=[DataRequired()])
     m_name = StringField('Middle name')

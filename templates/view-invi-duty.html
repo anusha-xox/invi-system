@@ -1,0 +1,58 @@
+{% include "header.html" %}
+<!--  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">-->
+<!--		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">-->
+<!--<div id="main">-->
+<div id="main">
+						<div class="inner">
+							<header>
+								<h1>View Current Allocations</h1>
+							</header>
+
+{% if no_invi == False %}
+<table class="table table-striped table-light">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Faculty Id</th>
+      <th scope="col">Academic Year</th>
+      <th scope="col">Exam Type</th>
+      <th scope="col">Classroom ID</th>
+      <th scope="col">Department ID</th>
+      <th scope="col">Subject</th>
+      <th scope="col">Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for i in range(0, len_all_duties): %}
+    <tr>
+      <th scope="row">{{all_duties[i].faculty_id}}</th>
+      <td>{{ all_duties[i].academic_year }}</td>
+      <td>{{ all_duties[i].exam_type }}</td>
+      <td>{{ all_duties[i].classroom_id }}</td>
+      <td>{{ all_duties[i].department_id }}</td>
+      <td>{{ all_duties[i].subject_id }}</td>
+      <td>{{ dates[i] }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No allocations have been made yet.</p>
+{% endif %}
+                          <form action="{{ url_for('allocate_invigilator')}}" method="post">
+                      <input class="btn btn-default" id="submit" name="submit" type="submit" value="Make New Allocs">
+          </form>
+                </div>
+</div>
+
+
+
+
+<!-- Footer -->
+
+
+<!-- Footer -->
+
+ <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+
+
+{% include "footer.html" %}

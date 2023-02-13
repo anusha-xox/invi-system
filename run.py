@@ -58,6 +58,7 @@ def run_the_algo():
     for row in records:
         faculty.append(row[0])
         invig_count.append(row[1])
+    plt.switch_backend('agg')
     plt.bar(faculty, invig_count)
     plt.xlabel("Faculty ID")
     plt.ylabel("Invigilator Count")
