@@ -11,6 +11,7 @@ from wtforms.fields.html5 import DateField, IntegerField
 import datetime
 # from main import Exam, Subject
 
+
 DEPARTMENT_NAMES = ["Aerospace Engineering", "Biotechnology", "Chemical Engineering", "Civil Engineering",
                     "Computer Science and Engineering", "Electrical and Electronics Engineering",
                     "Electronics and Communication Engineering", "Electronics and Instrumentation Engineering",
@@ -31,6 +32,16 @@ db = SQLAlchemy(app)
 class Exam(db.Model):
     academic_year = db.Column(db.String(4), primary_key=True, nullable=False)
     exam_type = db.Column(db.String(15), primary_key=True, nullable=False)
+
+
+class Invigilates(db.Model):
+    # __bind_key__ = 'invigilation'
+    faculty_id = db.Column(db.String(10), db.ForeignKey('faculty.faculty_id'), primary_key=True)
+    academic_year = db.Column(db.String(4), db.ForeignKey('exam.academic_year'), primary_key=True)
+    exam_type = db.Column(db.String(15), db.ForeignKey('exam.exam_type'), primary_key=True)
+    classroom_id = db.Column(db.String(10), db.ForeignKey('classroom.classroom_id'), primary_key=True)
+    department_id = db.Column(db.String(10), db.ForeignKey('department.dept_id'), primary_key=True)
+    subject_id = db.Column(db.String(10), db.ForeignKey('subject.subject_id'), primary_key=True)
 
 
 class Subject(db.Model):
@@ -131,17 +142,15 @@ class SubjectForm(FlaskForm):
 #     submit = SubmitField('Submit')
 
 class SwapRequestForm(FlaskForm):
-    curr_fac_id = StringField('Your Faculty ID', validators=[DataRequired()])
+    curr_fac_id = StringField('Your Faculty ID', validators=[DataRequired()], render_kw={'readonly': False})
     other_fac_id = StringField('Their Faculty ID', validators=[DataRequired()])
-    old_date = StringField('Your Old Date of Invigilation Duty (DD/MM/YYYY)', validators=[DataRequired()])
-    new_date = StringField('Your New Date of Invigilation Duty (DD/MM/YYYY)', validators=[DataRequired()])
-    old_time = StringField('Your Old Time of Invigilation Duty (DD/MM/YYYY)', validators=[DataRequired()])
-    new_time = StringField('Your New Time of Invigilation Duty (DD/MM/YYYY)', validators=[DataRequired()])
-    old_exam_type = SelectField('Your Old Exam Type', choices=EXAM_TYPE, validators=[DataRequired()])
-    new_exam_type = SelectField('Your New Exam Type', choices=EXAM_TYPE, validators=[DataRequired()])
-    old_exam_year = SelectField('Your Old Exam Year', choices=EXAM_YEAR, validators=[DataRequired()])
-    new_exam_year = SelectField('Your New Exam Year', choices=EXAM_YEAR, validators=[DataRequired()])
-    old_subject_code = SelectField("Old Subject Code", choices=SUBJECT_CODES, validators=[DataRequired()])
-    new_subject_code = SelectField('New Subject Code', choices=SUBJECT_CODES, validators=[DataRequired()])
+    your_exam_slot = SelectField('Your Exam Slot', validators=[DataRequired()])
+    their_exam_slot = SelectField('Their Exam Slot', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
+    def __init__(self, *args, **kwargs):
+        super(SwapRequestForm, self).__init__(*args, **kwargs)
+        self.your_exam_slot.choices = [f"{c.academic_year} ~ {c.exam_type} ~ {c.subject_id}" for c in
+                                       Invigilates.query.all()]
+        self.their_exam_slot.choices = [f"{c.academic_year} ~ {c.exam_type} ~ {c.subject_id}" for c in
+                                        Invigilates.query.all()]

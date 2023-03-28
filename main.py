@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 import mysql.connector
 from mysql.connector import Error
 import run as r
+
 ## for idcard
 # from pyzbar import pyzbar
 # import cv2
@@ -45,7 +46,6 @@ app.config['SECRET_KEY'] = 'any-secret-key-you-choose'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///invi-system.db'
 engine = create_engine('mysql+pymysql://sql12609170:XR9CRf2TYY@sql12.freesqldatabase.com/sql12609170')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://sql12609170:XR9CRf2TYY@sql12.freesqldatabase.com/sql12609170'
-
 
 # app.config['SQLALCHEMY_BINDS'] = {'faculty': 'sqlite:///faculty.db',
 #                                   'subject': 'sqlite:///subject.db',
@@ -238,20 +238,12 @@ class Student(db.Model):
     subject_id = db.Column(db.String(10), db.ForeignKey('subject.subject_id'), primary_key=True)
 
 
-class SwappingTable(db.Model):
+class SwapTable(db.Model):
     swap_id = db.Column(db.Integer, primary_key=True)
-    curr_fac_id = db.Column(db.Integer, unique=False, nullable=False)
-    other_fac_id = db.Column(db.Integer, unique=False, nullable=False)
-    old_date = db.Column(db.String(250), unique=False, nullable=False)
-    new_date = db.Column(db.String(250), unique=False, nullable=False)
-    old_time = db.Column(db.String(250), unique=False, nullable=False)
-    new_time = db.Column(db.String(250), unique=False, nullable=False)
-    old_exam_type = db.Column(db.String(250), unique=False, nullable=False)
-    new_exam_type = db.Column(db.String(250), unique=False, nullable=False)
-    old_exam_year = db.Column(db.String(250), unique=False, nullable=False)
-    new_exam_year = db.Column(db.String(250), unique=False, nullable=False)
-    old_subject_code = db.Column(db.String(250), unique=False, nullable=False)
-    new_subject_code = db.Column(db.String(250), unique=False, nullable=False)
+    curr_fac_id = db.Column(db.String(250), unique=False, nullable=False)
+    other_fac_id = db.Column(db.String(250), unique=False, nullable=False)
+    your_exam_slot = db.Column(db.String(250), unique=False, nullable=False)
+    their_exam_slot = db.Column(db.String(250), unique=False, nullable=False)
 
 
 db.create_all()
@@ -357,24 +349,24 @@ def admin():
         "Generate Department Report",
         "Generate Duty Report",
         "Give Invigilator Group",
-        "View Swap Requests",
         "No of Faculties vs Department Plot",
         "Invigilators vs Invigilation Count Plot",
         "Assign Classroom",
         "Add Exam Type",
-        "Add Date to Exam",
+        "Add Date and to Exam",
+        "View Swap Requests",
     ]
     ADMIN_LINKS = [
         url_for('view_faculties'),
         url_for('view_faculty_dept'),
         url_for("view_invi_report"),
         url_for('admin_assign_group'),
-        url_for("view_swap_requests"),
         url_for("plot"),
         url_for("admin_algo_plot"),
         url_for('admin_assign_classroom'),
         url_for('admin_add_exam'),
-        url_for('admin_add_exam_date')
+        url_for('admin_add_exam_date'),
+        url_for("view_swap_requests"),
     ]
     if not (len(a) == 0 or len(c) == 0 or len(d) == 0 or len(e) == 0 or len(ex) == 0 or len(f) == 0 or len(
             he) == 0 or len(i) == 0 or len(s) == 0 or len(su) == 0):
@@ -460,27 +452,20 @@ def swap_request():
     current_faculty = Faculty.query.filter_by(faculty_id=faculty_id).filter_by(dept_id=dept_id).first()
     if current_faculty:
         form = SwapRequestForm(
-            cur_fac_id=current_faculty.faculty_id,
+            cur_fac_id=faculty_id,
         )
         if form.validate_on_submit():
-            new_record = SwappingTable(
-                curr_fac_id=form.curr_fac_id.data,
-                other_fac_id=form.other_fac_id.data,
-                old_date=form.old_date.data,
-                new_date=form.new_date.data,
-                old_time=form.old_time.data,
-                new_time=form.new_time.data,
-                old_exam_type=form.old_exam_type.data,
-                new_exam_type=form.new_exam_type.data,
-                old_exam_year=form.old_exam_year.data,
-                new_exam_year=form.new_exam_year.data,
-                old_subject_code=form.old_subject_code.data,
-                new_subject_code=form.new_subject_code.data,
-            )
-            db.session.add(new_record)
-            db.session.commit()
-            curr_fac_id = int(form.curr_fac_id.data)
-            return redirect(url_for("faculty_dashboard", fac_id=curr_fac_id))
+            if Faculty.query.filter_by(faculty_id=form.other_fac_id.data).first():
+                new_record = SwapTable(
+                    curr_fac_id=form.curr_fac_id.data,
+                    other_fac_id=form.other_fac_id.data,
+                    your_exam_slot=form.your_exam_slot.data,
+                    their_exam_slot=form.their_exam_slot.data
+                )
+                db.session.add(new_record)
+                db.session.commit()
+                curr_fac_id = int(form.curr_fac_id.data)
+                return redirect(url_for("faculty_dashboard", fac_id=curr_fac_id))
         return render_template("add_details.html", form=form, display_name=current_faculty.f_name)
 
 
@@ -614,7 +599,7 @@ def view_invi_report():
 
 @app.route('/admin/view-swap-requests', methods=['GET', 'POST'])
 def view_swap_requests():
-    all_requests = SwappingTable.query.order_by("swap_id").all()
+    all_requests = SwapTable.query.order_by("swap_id").all()
     return render_template("view_swap_requests.html", all_requests=all_requests, table_heading="All Swap Requests")
 
 
@@ -712,4 +697,3 @@ def barcode_reader():
 
 if __name__ == "__main__":
     app.run(debug=True)
-

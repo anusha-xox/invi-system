@@ -12,27 +12,23 @@
     <tr>
       <th scope="col">Faculty Requesting</th>
       <th scope="col">Swapping With</th>
-      <th scope="col">Old Duty Date & Time</th>
-      <th scope="col">New Duty Date & Time</th>
-      <th scope="col">Old Subject Code</th>
-      <th scope="col">New Subject Code</th>
+      <th scope="col">Prev Exam Details</th>
+      <th scope="col">New Exam Details</th>
     </tr>
   </thead>
   <tbody>
     {% for req in all_requests: %}
     <tr>
-      <th scope="row">{{req.curr_fac_id}}</th>
+      <th scope="row">{{ req.curr_fac_id}}</th>
       <td>{{ req.other_fac_id }}</td>
-      <td>{{ req.old_date }} & {{ req.old_time }}</td>
-      <td>{{ req.new_date }} & {{ req.new_time }} </td>
-      <td>{{ req.old_subject_code }}</td>
-      <td>{{ req.new_subject_code }}</td>
-
-        <td>
+      <td>{{ req.your_exam_slot }}</td>
+      <td>{{ req.their_exam_slot}} </td>
 <!--          <p><b><a href="{{ url_for('register') }}">Approve</a>.</b></p>-->
+      <td>
           <form action="{{ url_for('approve_swap', swap_id= req.swap_id)}}" method="post">
-                      <input class="btn btn-default" id="submit" name="submit" type="submit" value="Approve"></td>
+                      <input class="btn btn-default" id="submit" name="submit" type="submit" value="Approve">
           </form>
+      </td>
     </tr>
     {% endfor %}
   </tbody>
