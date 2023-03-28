@@ -690,22 +690,22 @@ def barcode_reader():
     return render_template('barcode.html', display_name=display_name, default_email=default_email)
 
 
-@app.route('/display_barcode')
-def display_barcode():
-    display_name = request.args.get("display_name")
-    default_email = request.args.get("default_email")
-    return render_template(
-        'display_barcode.html',
-        type1=type_barcode,
-        data1=data_barcode,
-        display_name=display_name,
-        default_email=default_email
-    )
+# @app.route('/display_barcode')
+# def display_barcode():
+#     display_name = request.args.get("display_name")
+#     default_email = request.args.get("default_email")
+#     return render_template(
+#         'display_barcode.html',
+#         type1=type_barcode,
+#         data1=data_barcode,
+#         display_name=display_name,
+#         default_email=default_email
+#     )
 
 
-@app.route('/video_feed')
-def video_feed():
-    return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
+# @app.route('/video_feed')
+# def video_feed():
+#     return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 if __name__ == "__main__":

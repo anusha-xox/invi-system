@@ -6,7 +6,7 @@ from flask_wtf.file import FileField, FileRequired, FileAllowed
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 import email_validator
 from wtforms.fields.html5 import DateField, IntegerField
-from main import Exam, Subject
+# from main import Exam, Subject
 
 DEPARTMENT_NAMES = ["Aerospace Engineering", "Biotechnology", "Chemical Engineering", "Civil Engineering",
                     "Computer Science and Engineering", "Electrical and Electronics Engineering",
