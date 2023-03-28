@@ -13,7 +13,6 @@
   <thead class="thead-dark">
     <tr>
       <th scope="col">Dept Id</th>
-      <th scope="col">Dept Name</th>
       <th scope="col">Group Id</th>
       <th scope="col">Faculty Id</th>
     </tr>
@@ -22,7 +21,6 @@
     {% for fac in all_faculty: %}
     <tr>
       <th scope="row">{{ fac.dept_id }}</th>
-      <td>{{ fac.dept_name }}</td>
       <td>{{ fac.group_id }}</td>
       <td>{{fac.faculty_id}}</td>
     </tr>
