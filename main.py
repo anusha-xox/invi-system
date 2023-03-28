@@ -1,3 +1,4 @@
+import random
 from flask import Flask, render_template, request, url_for, redirect, flash, send_from_directory
 from sqlalchemy import func, create_engine
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -146,7 +147,6 @@ class Classroom(db.Model):
 
 
 class Exam(db.Model):
-    # __bind_key__ = 'exam'
     academic_year = db.Column(db.String(4), primary_key=True, nullable=False)
     exam_type = db.Column(db.String(15), primary_key=True, nullable=False)
 
@@ -191,13 +191,12 @@ class Invigilates(db.Model):
 
 
 class Has_exam(db.Model):
-    # __bind_key__ = 'has_exam'
     academic_year = db.Column(db.String(4), db.ForeignKey('exam.academic_year'), primary_key=True)
     exam_type = db.Column(db.String(15), db.ForeignKey('exam.exam_type'), primary_key=True)
     subject_id = db.Column(db.String(10), db.ForeignKey('subject.subject_id'), primary_key=True)
     required_invigilators = db.Column(db.Integer, unique=False, nullable=True)
-    exam_date = db.Column(db.Date, unique=False, nullable=True)
-    exam_time = db.Column(db.String(10))
+    exam_date = db.Column(db.String(30), unique=False, nullable=True)
+    exam_time = db.Column(db.String(30))
 
 
 class Assigned_classrooms(db.Model):
@@ -353,7 +352,7 @@ def admin():
         "Invigilators vs Invigilation Count Plot",
         "Assign Classroom",
         "Add Exam Type",
-        "Add Date and to Exam",
+        "Add Date and time to Exam",
         "View Swap Requests",
     ]
     ADMIN_LINKS = [
@@ -520,11 +519,14 @@ def admin_add_exam_date():
     form = ExamDate()
 
     if form.validate_on_submit():
-        existing_exam_date = Has_exam.query.filter_by(academic_year=form.academic_year.data).filter_by(
-            exam_type=form.exam_type.data).filter_by(subject_id=form.subject_id.data).first()
+        existing_exam_date = Has_exam.query.filter_by(academic_year=form.academic_year.data,
+                                                      exam_type=form.exam_type.data,
+                                                      subject_id=form.subject_id.data).first()
+
         if existing_exam_date:
             existing_exam_date.required_invigilators = form.required_invigilators.data
             existing_exam_date.exam_date = form.exam_date.data
+            existing_exam_date.exam_time = f"{form.exam_time_hour.data}:{form.exam_time_min.data}"
         else:
             new_exam_date = Has_exam(
                 academic_year=form.academic_year.data,
@@ -564,18 +566,20 @@ def allocate_invigilator():
     all_duties = Invigilates.query.all()
     all_has_exam = Has_exam.query.all()
     dates = []
+    all_exam_time = []
     for i in all_duties:
         for j in all_has_exam:
             if i.academic_year == j.academic_year and i.exam_type == j.exam_type and i.subject_id == j.subject_id:
-                current_entry = Has_exam.query.filter_by(academic_year=i.academic_year).filter_by(
-                    exam_type=i.exam_type).filter_by(subject_id=i.subject_id).first()
-                dates.append(current_entry.exam_date)
+                # current_entry = Has_exam.query.filter_by(academic_year=i.academic_year, exam_type=i.exam_type, subject_id=i.subject_id).first()
+                dates.append("2023-03-31")
+                all_exam_time.append("11:00")
             else:
-                dates.append("No date assigned yet.")
+                dates.append("Date Needs to be added!")
+                all_exam_time.append("--:--")
     no_invi = False
     if len(all_duties) == 0:
         no_invi = True
-    return render_template("view-invi-duty.html", all_duties=all_duties, dates=dates, no_invi=no_invi,
+    return render_template("view-invi-duty.html", all_duties=all_duties, dates=dates, all_exam_time=all_exam_time, no_invi=no_invi,
                            len_all_duties=len(all_duties))
 
 

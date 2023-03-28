@@ -19,6 +19,8 @@
       <th scope="col">Department ID</th>
       <th scope="col">Subject</th>
       <th scope="col">Date</th>
+      <th scope="col">Starting Time</th>
+
     </tr>
   </thead>
   <tbody>
@@ -31,6 +33,8 @@
       <td>{{ all_duties[i].department_id }}</td>
       <td>{{ all_duties[i].subject_id }}</td>
       <td>{{ dates[i] }}</td>
+      <td>{{ all_exam_time[i] }}</td>
+
     </tr>
     {% endfor %}
   </tbody>
