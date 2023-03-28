@@ -72,9 +72,9 @@ with engine.connect() as con:
     con.execute(
         "CREATE TABLE IF NOT EXISTS `faculty` (   `faculty_id` varchar(10) NOT NULL,   `f_name` varchar(250) NOT NULL,   `m_name` varchar(250) NOT NULL,   `l_name` varchar(250) NOT NULL,   `email` varchar(250) NOT NULL,   `phone_no` varchar(10) NOT NULL,   `group_id` varchar(250) NOT NULL,   `invig_count` int NOT NULL,   `special_count` int NOT NULL,   `dept_id` varchar(250) NOT NULL,   PRIMARY KEY (`faculty_id`,`dept_id`),   UNIQUE KEY `email` (`email`),   UNIQUE KEY `phone_no` (`phone_no`),   KEY `dept_id` (`dept_id`),   CONSTRAINT `faculty_ibfk_1` FOREIGN KEY (`dept_id`) REFERENCES `department` (`dept_id`) )")
     con.execute(
-        "CREATE TABLE IF NOT EXISTS `SUBJECT` (   `subject_id` varchar(250) NOT NULL,   `subject_name` varchar(250) NOT NULL,   `subject_duration` varchar(15) NOT NULL,   PRIMARY KEY (`subject_id`) )")
+        "CREATE TABLE IF NOT EXISTS `subject` (   `subject_id` varchar(250) NOT NULL,   `subject_name` varchar(250) NOT NULL,   `subject_duration` varchar(15) NOT NULL,   PRIMARY KEY (`subject_id`) )")
     con.execute(
-        "CREATE TABLE IF NOT EXISTS `EXAM` (   `academic_year` varchar(4) NOT NULL,   `exam_type` varchar(15) NOT NULL,   PRIMARY KEY (`academic_year`,`exam_type`) )")
+        "CREATE TABLE IF NOT EXISTS `exam` (   `academic_year` varchar(4) NOT NULL,   `exam_type` varchar(15) NOT NULL,   PRIMARY KEY (`academic_year`,`exam_type`) )")
     con.execute(
         "CREATE TABLE IF NOT EXISTS `enrolled` (   `Academic_Year` varchar(4) NOT NULL,   `Exam_Type` varchar(20) NOT NULL,   `Subject_ID` varchar(10) NOT NULL,   `students_enrolled` int DEFAULT NULL,   PRIMARY KEY (`Academic_Year`,`Exam_Type`,`Subject_ID`),   KEY `Subject_ID` (`Subject_ID`),   CONSTRAINT `enrolled_ibfk_1` FOREIGN KEY (`Academic_Year`, `Exam_Type`) REFERENCES `exam` (`academic_year`, `exam_type`) ON DELETE CASCADE,   CONSTRAINT `enrolled_ibfk_2` FOREIGN KEY (`Subject_ID`) REFERENCES `subject` (`subject_id`) )")
     con.execute(
