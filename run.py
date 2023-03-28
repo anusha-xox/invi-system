@@ -6,10 +6,10 @@ from mysql.connector import Error
 
 def run_the_algo():
     try:
-        connection = mysql.connector.connect(host="localhost",
-                                             database="SEE_INV_withflask",
-                                             user="root",
-                                             password="toor")
+        connection = mysql.connector.connect(host="sql12.freesqldatabase.com",
+                                             database="sql12609170",
+                                             user="sql12609170",
+                                             password="XR9CRf2TYY")
         if connection.is_connected():
             db_Info = connection.get_server_info()
             print("Connected to MySQL Server version ", db_Info)
@@ -50,7 +50,7 @@ def run_the_algo():
 
     s.group_gets_assigned(classrooms_to_be_assigned, cursor, connection)
 
-    query = "select Faculty_ID, Invig_count from FACULTY"
+    query = "select Faculty_ID, Invig_count from faculty"
     cursor.execute(query)
     records = cursor.fetchall()
     faculty = []

@@ -21,8 +21,8 @@ from mysql.connector import Error
 from sqlalchemy import create_engine
 import run as r
 ## for idcard
-from pyzbar import pyzbar
-import cv2
+# from pyzbar import pyzbar
+# import cv2
 
 # cursor,connection = None,None
 # try:
@@ -44,8 +44,8 @@ app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'any-secret-key-you-choose'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///invi-system.db'
-engine = create_engine('mysql+pymysql://root:toor@localhost/SEE_INV_withflask')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:toor@localhost/SEE_INV_withflask'
+engine = create_engine('mysql+pymysql://sql12609170:XR9CRf2TYY@sql12.freesqldatabase.com/sql12609170')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://sql12609170:XR9CRf2TYY@sql12.freesqldatabase.com/sql12609170'
 #
 
 # app.config['SQLALCHEMY_BINDS'] = {'faculty': 'sqlite:///faculty.db',
@@ -61,8 +61,8 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 with engine.connect() as con:
-    con.execute("CREATE DATABASE IF NOT EXISTS SEE_INV_withflask")
-    con.execute("USE SEE_INV_withflask")
+    # con.execute("CREATE DATABASE IF NOT EXISTS SEE_INV_withflask")
+    # con.execute("USE SEE_INV_withflask")
     con.execute(
         "CREATE TABLE IF NOT EXISTS `user` (`id` int NOT NULL AUTO_INCREMENT,`email` varchar(100) DEFAULT NULL,`password` varchar(100) DEFAULT NULL,`username` varchar(1000) DEFAULT NULL,PRIMARY KEY (`id`),UNIQUE KEY `email` (`email`))")
     con.execute(
@@ -87,42 +87,42 @@ with engine.connect() as con:
         "CREATE TABLE IF NOT EXISTS `assigned_classrooms` (   `classroom_id` varchar(10) NOT NULL,   `subject_id` varchar(10) NOT NULL,   `exam_type` varchar(15) NOT NULL,   `academic_year` varchar(4) NOT NULL,   `department_id` varchar(10) NOT NULL,   PRIMARY KEY (`classroom_id`,`subject_id`,`exam_type`,`academic_year`,`department_id`),   KEY `subject_id` (`subject_id`),   KEY `academic_year` (`academic_year`,`exam_type`),   KEY `department_id` (`department_id`),   CONSTRAINT `assigned_classrooms_ibfk_1` FOREIGN KEY (`classroom_id`) REFERENCES `classroom` (`classroom_id`),   CONSTRAINT `assigned_classrooms_ibfk_2`FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`),   CONSTRAINT `assigned_classrooms_ibfk_3` FOREIGN KEY (`academic_year`, `exam_type`) REFERENCES `exam` (`academic_year`, `exam_type`),   CONSTRAINT `assigned_classrooms_ibfk_4` FOREIGN KEY (`department_id`) REFERENCES `department` (`dept_id`) )")
 
 
-def draw_barcode(decoded, image):
-    image = cv2.rectangle(image, (decoded.rect.left, decoded.rect.top),
-                          (decoded.rect.left + decoded.rect.width, decoded.rect.top + decoded.rect.height),
-                          color=(0, 255, 0),
-                          thickness=5)
-    return image
+# def draw_barcode(decoded, image):
+#     image = cv2.rectangle(image, (decoded.rect.left, decoded.rect.top),
+#                           (decoded.rect.left + decoded.rect.width, decoded.rect.top + decoded.rect.height),
+#                           color=(0, 255, 0),
+#                           thickness=5)
+#     return image
 
 
-def gen():
-    camera = cv2.VideoCapture(0)
-
-    while True:
-        success, frame = camera.read()
-        if not success:
-            break
-        else:
-            decoded_objects = pyzbar.decode(frame)
-            for obj in decoded_objects:
-                # draw the barcode
-                print("detected barcode:", obj)
-                image = draw_barcode(obj, frame)
-                global data_barcode
-                global type_barcode
-                type_barcode = obj.type
-                data_barcode = obj.data
-                str1 = obj.data.decode('UTF-8')
-                data_barcode = str1
-                # print barcode type & data
-                print("Type:", obj.type)
-                print("Data:", obj.data)
-                print()
-
-            ret, buffer = cv2.imencode(".jpg", frame)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+# def gen():
+#     camera = cv2.VideoCapture(0)
+#
+#     while True:
+#         success, frame = camera.read()
+#         if not success:
+#             break
+#         else:
+#             decoded_objects = pyzbar.decode(frame)
+#             for obj in decoded_objects:
+#                 # draw the barcode
+#                 print("detected barcode:", obj)
+#                 image = draw_barcode(obj, frame)
+#                 global data_barcode
+#                 global type_barcode
+#                 type_barcode = obj.type
+#                 data_barcode = obj.data
+#                 str1 = obj.data.decode('UTF-8')
+#                 data_barcode = str1
+#                 # print barcode type & data
+#                 print("Type:", obj.type)
+#                 print("Data:", obj.data)
+#                 print()
+#
+#             ret, buffer = cv2.imencode(".jpg", frame)
+#             frame = buffer.tobytes()
+#             yield (b'--frame\r\n'
+#                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
 class User(UserMixin, db.Model):

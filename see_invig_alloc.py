@@ -8,10 +8,10 @@ from mysql.connector import Error
 
 def connect():
     try:
-        connection = mysql.connector.connect(host="localhost",
-                                             database="SEE_INV_withflask_tryingalgo",
-                                             user="root",
-                                             password="toor")
+        connection = mysql.connector.connect(host="sql12.freesqldatabase.com",
+                                             database="sql12609170",
+                                             user="sql12609170",
+                                             password="XR9CRf2TYY")
         if connection.is_connected():
             db_Info = connection.get_server_info()
             print("Connected to MySQL Server version ", db_Info)
@@ -25,7 +25,7 @@ def connect():
 
 
 def get_possible_exams(cursor, connection):
-    query = "select * from EXAM"
+    query = "select * from exam"
     cursor.execute(query)
     records = cursor.fetchall()
     exams = []
@@ -33,7 +33,7 @@ def get_possible_exams(cursor, connection):
         exams.append(row)
     exams = set(exams)
     exams = list(exams)
-    query = "select Subject_ID from SUBJECT"
+    query = "select Subject_ID from subject"
     cursor.execute(query)
     records = cursor.fetchall()
     subjects = []
@@ -49,31 +49,31 @@ def get_possible_exams(cursor, connection):
 
 
 def insert_into_has_exam(academic_year, exam_type, subject_id, cursor, connection):
-    query = "insert into HAS_EXAM(academic_year, exam_type, subject_id) values(%s, %s, %s)"
+    query = "insert into has_exam(academic_year, exam_type, subject_id) values(%s, %s, %s)"
     cursor.execute(query, (academic_year, exam_type, subject_id))
     connection.commit()
 
 
 def insert_into_enrolled(academic_year, exam_type, subject_id, cursor, connection):
-    query = "insert into ENROLLED(academic_year, exam_type, subject_id) values(%s, %s, %s)"
+    query = "insert into enrolled(academic_year, exam_type, subject_id) values(%s, %s, %s)"
     cursor.execute(query, (academic_year, exam_type, subject_id))
     connection.commit()
 
 
 def update_enrolled(subject_id, students_enrolled, exam_type, academic_year, cursor, connection):
-    query = "update ENROLLED set students_enrolled = %s where Subject_ID = %s and Exam_Type = %s and Academic_Year = %s"
+    query = "update enrolled set students_enrolled = %s where Subject_ID = %s and Exam_Type = %s and Academic_Year = %s"
     cursor.execute(query, (students_enrolled, subject_id, exam_type, academic_year))
     connection.commit()
 
 
 def insert_into_classroom(classroom_id, capacity, department_id, cursor, connection):
-    query = "insert into CLASSROOM values(%s, %s, %s)"
+    query = "insert into classroom values(%s, %s, %s)"
     cursor.execute(query, (classroom_id, capacity, department_id))
     connection.commit()
 
 
 def get_students_enrolled(subject_id, exam_type, academic_year, cursor, connection):
-    query = "select Students_Enrolled from ENROLLED where Subject_ID = %s and Exam_Type = %s and Academic_Year = %s"
+    query = "select Students_Enrolled from enrolled where Subject_ID = %s and Exam_Type = %s and Academic_Year = %s"
     cursor.execute(query, (subject_id, exam_type, academic_year))
     records = cursor.fetchall()
     students_enrolled = records[0][0]
@@ -81,7 +81,7 @@ def get_students_enrolled(subject_id, exam_type, academic_year, cursor, connecti
 
 
 def get_classrooms(cursor, connection):
-    query = "select Classroom_ID, Capacity, Dept_ID from CLASSROOM"
+    query = "select Classroom_ID, Capacity, Dept_ID from classroom"
     cursor.execute(query)
     records = cursor.fetchall()
     classrooms = []
@@ -106,7 +106,7 @@ def assign_classrooms(subject_id, exam_type, academic_year, cursor, connection):
                 # print(available_classrooms[x][0]+', '+available_classrooms[x][2])
                 students_enrolled = students_enrolled - available_classrooms[x][1]
     t = len(used_classrooms)
-    query = "update HAS_EXAM set required_invigilators = %s where Subject_ID = %s and Exam_Type = %s and Academic_Year = %s"
+    query = "update has_exam set required_invigilators = %s where Subject_ID = %s and Exam_Type = %s and Academic_Year = %s"
     cursor.execute(query, (t, subject_id, exam_type, academic_year))
     connection.commit()
     for i in used_classrooms:
@@ -115,7 +115,7 @@ def assign_classrooms(subject_id, exam_type, academic_year, cursor, connection):
 
 
 def get_groups(cursor, connection):
-    query = "select Group_ID, Dept_ID, Invig_count from FACULTY"
+    query = "select Group_ID, Dept_ID, Invig_count from faculty"
     cursor.execute(query)
     records = cursor.fetchall()
     answer = []
@@ -127,7 +127,7 @@ def get_groups(cursor, connection):
 
 
 def get_invig_count(faculty_id, department_id, cursor, connection):
-    query = "select Invig_count from FACULTY where Faculty_ID = %s and Dept_ID = %s"
+    query = "select Invig_count from faculty where Faculty_ID = %s and Dept_ID = %s"
     cursor.execute(query, (faculty_id, department_id))
     records = cursor.fetchall()
     invig_count = records[0][0]
@@ -135,7 +135,7 @@ def get_invig_count(faculty_id, department_id, cursor, connection):
 
 
 def get_faculties_in_group(group_id, department_id, cursor, connection):
-    query = "select Faculty_ID from FACULTY where Group_ID = %s and Dept_ID = %s"
+    query = "select Faculty_ID from faculty where Group_ID = %s and Dept_ID = %s"
     cursor.execute(query, (group_id, department_id))
     records = cursor.fetchall()
     faculties = []
@@ -162,7 +162,7 @@ def get_classrooms_assigned(cursor, connection):
 
 
 def increment_invig_count(faculty_id, department_id, cursor, connection):
-    query = "update FACULTY set Invig_count = Invig_count + 1 where Faculty_ID = %s and Dept_ID = %s"
+    query = "update faculty set Invig_count = Invig_count + 1 where Faculty_ID = %s and Dept_ID = %s"
     cursor.execute(query, (faculty_id, department_id))
     connection.commit()
 
