@@ -198,6 +198,7 @@ class Has_exam(db.Model):
     subject_id = db.Column(db.String(10), db.ForeignKey('subject.subject_id'), primary_key=True)
     required_invigilators = db.Column(db.Integer, unique=False, nullable=True)
     exam_date = db.Column(db.Date, unique=False, nullable=True)
+    exam_time = db.Column(db.String(10))
 
 
 class Assigned_classrooms(db.Model):
@@ -546,7 +547,8 @@ def admin_add_exam_date():
                 exam_type=form.exam_type.data,
                 subject_id=form.subject_id.data,
                 required_invigilators=form.required_invigilators.data,
-                exam_date=form.exam_date.data
+                exam_date=form.exam_date.data,
+                exam_time=f"{form.exam_time_hour.data}:{form.exam_time_min.data}",
             )
             db.session.add(new_exam_date)
         db.session.commit()
@@ -712,4 +714,3 @@ def barcode_reader():
 if __name__ == "__main__":
     app.run(debug=True)
 
-### Table with list of classrooms and edit feature

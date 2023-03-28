@@ -2,12 +2,14 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from flask import Flask
 from wtforms import StringField, PasswordField, SubmitField, SelectField
-from wtforms.validators import DataRequired, Email, Length
+from wtforms.validators import DataRequired, Email, Length, NumberRange, ValidationError
 from flask_bootstrap import Bootstrap
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 import email_validator
 from wtforms.fields.html5 import DateField, IntegerField
+import datetime
+
 # from main import Exam, Subject
 DEPARTMENT_NAMES = ["Aerospace Engineering", "Biotechnology", "Chemical Engineering", "Civil Engineering",
                     "Computer Science and Engineering", "Electrical and Electronics Engineering",
@@ -20,20 +22,22 @@ FACULTY_ROLE = ["Room Superintendent", "Deputy Room Superintendent", "Squad Team
 EXAM_TYPE = ["Regular", "Fasttrack", "Make Up"]
 EXAM_YEAR = ["2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023"]
 SUBJECT_CODES = ["18MA11", "18PH12", "18EE13", "18CV14", "18EE15", "18ME16", "18HS17"]
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://sql12609170:XR9CRf2TYY@sql12.freesqldatabase.com/sql12609170'
 db = SQLAlchemy(app)
 
+
 class Exam(db.Model):
-    # __bind_key__ = 'exam'
     academic_year = db.Column(db.String(4), primary_key=True, nullable=False)
     exam_type = db.Column(db.String(15), primary_key=True, nullable=False)
 
+
 class Subject(db.Model):
-    # __bind_key__ = 'subject'
     subject_id = db.Column(db.String(10), primary_key=True)
     subject_name = db.Column(db.String(100), unique=False, nullable=False)
     subject_duration = db.Column(db.String(15), unique=False, nullable=False)
+
 
 class LoginForm(FlaskForm):
     email = StringField(label='Email', validators=[DataRequired(), Email()])
@@ -87,9 +91,14 @@ class ExamDate(FlaskForm):
     subject_id = SelectField("Subject ID", validators=[DataRequired()])
     required_invigilators = IntegerField('Required Invigilators', validators=[DataRequired()])
     exam_date = DateField('Exam Date', format='%Y-%m-%d')
+    exam_time_hour = IntegerField('Start Hour (24hr format)', validators=[DataRequired(), NumberRange(min=0, max=24,
+                                                                                                      message='Please Enter a Valid Hour')])
+    exam_time_min = IntegerField('Start Minute', validators=[DataRequired(), NumberRange(min=0, max=59,
+                                                                                         message='Please Enter a Valid Minute')])
 
     def validate_date(form, field):
-        pass
+        if field.data < datetime.date.today():
+            raise ValidationError("The date cannot be in the past!")
 
     def __init__(self, *args, **kwargs):
         super(ExamDate, self).__init__(*args, **kwargs)
