@@ -96,7 +96,7 @@ class ExamDate(FlaskForm):
     exam_time_min = IntegerField('Start Minute', validators=[DataRequired(), NumberRange(min=0, max=59,
                                                                                          message='Please Enter a Valid Minute')])
 
-    def validate_date(form, field):
+    def validate_exam_date(form, field):
         if field.data < datetime.date.today():
             raise ValidationError("The date cannot be in the past!")
 
@@ -115,6 +115,21 @@ class SubjectForm(FlaskForm):
     submit = SubmitField('Submit')
 
 
+# class SwapRequestForm(FlaskForm):
+#     curr_fac_id = StringField('Your Faculty ID', validators=[DataRequired()])
+#     other_fac_id = StringField('Their Faculty ID', validators=[DataRequired()])
+#     old_date = StringField('Your Old Date of Invigilation Duty (DD/MM/YYYY)', validators=[DataRequired()])
+#     new_date = StringField('Your New Date of Invigilation Duty (DD/MM/YYYY)', validators=[DataRequired()])
+#     old_time = StringField('Your Old Time of Invigilation Duty (DD/MM/YYYY)', validators=[DataRequired()])
+#     new_time = StringField('Your New Time of Invigilation Duty (DD/MM/YYYY)', validators=[DataRequired()])
+#     old_exam_type = SelectField('Your Old Exam Type', choices=EXAM_TYPE, validators=[DataRequired()])
+#     new_exam_type = SelectField('Your New Exam Type', choices=EXAM_TYPE, validators=[DataRequired()])
+#     old_exam_year = SelectField('Your Old Exam Year', choices=EXAM_YEAR, validators=[DataRequired()])
+#     new_exam_year = SelectField('Your New Exam Year', choices=EXAM_YEAR, validators=[DataRequired()])
+#     old_subject_code = SelectField("Old Subject Code", choices=SUBJECT_CODES, validators=[DataRequired()])
+#     new_subject_code = SelectField('New Subject Code', choices=SUBJECT_CODES, validators=[DataRequired()])
+#     submit = SubmitField('Submit')
+
 class SwapRequestForm(FlaskForm):
     curr_fac_id = StringField('Your Faculty ID', validators=[DataRequired()])
     other_fac_id = StringField('Their Faculty ID', validators=[DataRequired()])
@@ -129,3 +144,4 @@ class SwapRequestForm(FlaskForm):
     old_subject_code = SelectField("Old Subject Code", choices=SUBJECT_CODES, validators=[DataRequired()])
     new_subject_code = SelectField('New Subject Code', choices=SUBJECT_CODES, validators=[DataRequired()])
     submit = SubmitField('Submit')
+

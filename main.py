@@ -51,7 +51,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://sql12609170:XR9CRf2TYY@
 #                                   'subject': 'sqlite:///subject.db',
 #                                   'admin': 'sqlite:///admin.db',
 #                                   'departments': 'sqlite:///departments.db'}
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 bootstrap = Bootstrap(app)
