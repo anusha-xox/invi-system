@@ -533,6 +533,7 @@ def admin_add_exam():
 @app.route('/admin/add-exam-date', methods=['GET', 'POST'])
 def admin_add_exam_date():
     form = ExamDate()
+
     if form.validate_on_submit():
         existing_exam_date = Has_exam.query.filter_by(academic_year=form.academic_year.data).filter_by(
             exam_type=form.exam_type.data).filter_by(subject_id=form.subject_id.data).first()

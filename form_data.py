@@ -6,8 +6,7 @@ from flask_wtf.file import FileField, FileRequired, FileAllowed
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
 import email_validator
 from wtforms.fields.html5 import DateField, IntegerField
-from main import Exam, Subject
-
+# from main import Exam, Subject
 DEPARTMENT_NAMES = ["Aerospace Engineering", "Biotechnology", "Chemical Engineering", "Civil Engineering",
                     "Computer Science and Engineering", "Electrical and Electronics Engineering",
                     "Electronics and Communication Engineering", "Electronics and Instrumentation Engineering",
@@ -77,10 +76,10 @@ class ExamDate(FlaskForm):
     def validate_date(form, field):
         pass
 
-    def __init__(self, *args, **kwargs):
-        super(ExamDate, self).__init__(*args, **kwargs)
-        self.academic_year.choices = [c.academic_year for c in Exam.query.all()]
-        self.subject_id.choices = [c.subject_id for c in Subject.query.all()]
+    # def __init__(self, *args, **kwargs):
+    #     super(ExamDate, self).__init__(*args, **kwargs)
+    #     self.academic_year.choices = [c.academic_year for c in Exam.query.all()]
+    #     self.subject_id.choices = [c.subject_id for c in Subject.query.all()]
 
     submit = SubmitField(label='Submit')
 
