@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, url_for, redirect, flash, send_from_directory
-from sqlalchemy import func
+from sqlalchemy import func, create_engine
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from flask_bootstrap import Bootstrap
@@ -18,7 +18,6 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import mysql.connector
 from mysql.connector import Error
-from sqlalchemy import create_engine
 import run as r
 ## for idcard
 # from pyzbar import pyzbar
@@ -46,13 +45,13 @@ app.config['SECRET_KEY'] = 'any-secret-key-you-choose'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///invi-system.db'
 engine = create_engine('mysql+pymysql://sql12609170:XR9CRf2TYY@sql12.freesqldatabase.com/sql12609170')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://sql12609170:XR9CRf2TYY@sql12.freesqldatabase.com/sql12609170'
-#
+
 
 # app.config['SQLALCHEMY_BINDS'] = {'faculty': 'sqlite:///faculty.db',
 #                                   'subject': 'sqlite:///subject.db',
 #                                   'admin': 'sqlite:///admin.db',
 #                                   'departments': 'sqlite:///departments.db'}
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 bootstrap = Bootstrap(app)
@@ -712,5 +711,5 @@ def barcode_reader():
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
 

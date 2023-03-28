@@ -9,8 +9,8 @@ from flask_login import UserMixin, login_user, LoginManager, login_required, cur
 import email_validator
 from wtforms.fields.html5 import DateField, IntegerField
 import datetime
-
 # from main import Exam, Subject
+
 DEPARTMENT_NAMES = ["Aerospace Engineering", "Biotechnology", "Chemical Engineering", "Civil Engineering",
                     "Computer Science and Engineering", "Electrical and Electronics Engineering",
                     "Electronics and Communication Engineering", "Electronics and Instrumentation Engineering",
