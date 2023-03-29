@@ -643,8 +643,35 @@ def plot():
 
 @app.route('/admin/approve-swap', methods=['GET', 'POST'])
 def approve_swap():
-    pass
+    swap_id = request.args.get("swap_id")
+    db.session.delete(SwapTable.query.get(swap_id))
+    db.session.commit()
 
+    all_duties = Invigilates.query.all()
+    all_has_exam = Has_exam.query.all()
+    dates = []
+    all_exam_time = []
+    for i in all_duties:
+        for j in all_has_exam:
+            if i.academic_year == j.academic_year and i.exam_type == j.exam_type and i.subject_id == j.subject_id:
+                # current_entry = Has_exam.query.filter_by(academic_year=i.academic_year, exam_type=i.exam_type, subject_id=i.subject_id).first()
+                dates.append("2023-04-01")
+                all_exam_time.append("11:00")
+            else:
+                dates.append("Date Needs to be added!")
+                all_exam_time.append("--:--")
+    no_invi = False
+    if len(all_duties) == 0:
+        no_invi = True
+    return render_template("view-invi-duty.html", all_duties=all_duties, dates=dates, all_exam_time=all_exam_time,
+                           no_invi=no_invi,
+                           len_all_duties=len(all_duties))
+
+@app.route('/admin/deny-swap', methods=['GET', 'POST'])
+def approve_swap():
+    swap_id = request.args.get("swap_id")
+    db.session.delete(SwapTable.query.get(swap_id))
+    db.session.commit()
 
 @app.route('/logout')
 def logout():
