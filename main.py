@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 import mysql.connector
 from mysql.connector import Error
 import run as r
+import re
 
 ## for idcard
 # from pyzbar import pyzbar
@@ -266,14 +267,18 @@ def register():
     if form.validate_on_submit():
         display_name = form.username.data
         default_email = form.email.data
-        new_user = User(
-            username=display_name,
-            email=default_email,
-            password=generate_password_hash(form.password.data, method='pbkdf2:sha256', salt_length=8)
-        )
-        db.session.add(new_user)
-        db.session.commit()
-        return redirect(url_for('add_faculty', display_name=display_name, default_email=default_email))
+        if re.search(r'rvce.edu.in$',default_email):
+            new_user = User(
+                username=display_name,
+                email=default_email,
+                password=generate_password_hash(form.password.data, method='pbkdf2:sha256', salt_length=8)
+            )
+            db.session.add(new_user)
+            db.session.commit()
+            return redirect(url_for('add_faculty', display_name=display_name, default_email=default_email))
+        else:
+            flash("Please enter a valid RVCE email ID.")
+            return redirect(url_for('register'))
     return render_template("enter.html", form=form, title_given="Register")
 
 
