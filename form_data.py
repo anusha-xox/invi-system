@@ -102,9 +102,9 @@ class ExamDate(FlaskForm):
     subject_id = SelectField("Subject ID", validators=[DataRequired()])
     required_invigilators = IntegerField('Required Invigilators', validators=[DataRequired()])
     exam_date = DateField('Exam Date', format='%Y-%m-%d')
-    exam_time_hour = IntegerField('Start Hour (24hr format)', validators=[DataRequired(), NumberRange(min=0, max=24,
+    exam_time_hour = IntegerField('Start Hour (24hr format)', validators=[DataRequired(), NumberRange(min=-1, max=24,
                                                                                                       message='Please Enter a Valid Hour')])
-    exam_time_min = IntegerField('Start Minute', validators=[DataRequired(), NumberRange(min=0, max=59,
+    exam_time_min = IntegerField('Start Minute', validators=[DataRequired(), NumberRange(min=-1, max=59,
                                                                                          message='Please Enter a Valid Minute')])
 
     def validate_exam_date(form, field):

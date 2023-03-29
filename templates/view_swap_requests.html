@@ -29,6 +29,11 @@
                       <input class="btn btn-default" id="submit" name="submit" type="submit" value="Approve">
           </form>
       </td>
+      <td>
+          <form action="{{ url_for('deny_swap', swap_id= req.swap_id)}}" method="post">
+                      <input class="btn btn-default" id="submit" name="submit" type="submit" value="Deny">
+          </form>
+      </td>
     </tr>
     {% endfor %}
   </tbody>
